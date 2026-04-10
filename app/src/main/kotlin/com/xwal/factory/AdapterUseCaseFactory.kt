@@ -38,7 +38,8 @@ class AdapterUseCaseFactory {
     @Singleton
     fun syncInstanceStateUseCase(
         instanceRepository: InstanceRepository,
-        adapterResolution: AdapterResolutionService
+        adapterResolution: AdapterResolutionService,
+        @io.micronaut.context.annotation.Value("\${xwal.instance-sync.batch-size:100}") batchSize: Int
     ): SyncInstanceStateUseCase =
-        SyncInstanceStateUseCaseImpl(instanceRepository, adapterResolution)
+        SyncInstanceStateUseCaseImpl(instanceRepository, adapterResolution, batchSize)
 }

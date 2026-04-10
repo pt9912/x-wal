@@ -16,7 +16,8 @@ class SecurityConfiguration {
         return GenericJwtClaimsValidator<HttpRequest<*>> { claims, _ ->
             val issuer = claims["iss"]?.toString() ?: ""
             val subject = claims["sub"]?.toString() ?: ""
-            val valid = issuer.contains("realms/xwal") && subject.isNotBlank()
+            // Exact suffix match to prevent spoofed issuers
+            val valid = issuer.endsWith("/realms/xwal") && subject.isNotBlank()
             if (!valid) {
                 log.warn("JWT validation failed: issuer={}, subject={}", issuer, subject)
             }

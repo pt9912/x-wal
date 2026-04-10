@@ -1,6 +1,5 @@
 package com.xwal.adapter.identity
 
-import io.micronaut.security.token.Claims
 import io.micronaut.security.token.RolesFinder
 import jakarta.inject.Singleton
 import org.slf4j.LoggerFactory

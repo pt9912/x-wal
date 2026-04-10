@@ -27,7 +27,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.xwal.ApplicationKt")
+    mainClass.set("com.xwal.Application")
 }
 
 micronaut {

@@ -13,18 +13,6 @@ import jakarta.inject.Singleton
 class WorkflowUseCaseFactory {
 
     @Singleton
-    fun iwmValidationService(): IwmValidationService =
-        IwmValidationService(IwmValidator())
-
-    @Singleton
-    fun adapterResolutionService(
-        adapterConfigRepository: EngineAdapterConfigRepository,
-        adapterCache: AdapterInstanceCachePort,
-        adapterFactory: EngineAdapterFactoryPort
-    ): AdapterResolutionService =
-        AdapterResolutionService(adapterConfigRepository, adapterCache, adapterFactory)
-
-    @Singleton
     fun createWorkflowUseCase(
         workflowRepository: WorkflowRepository,
         transactionPort: TransactionPort,
