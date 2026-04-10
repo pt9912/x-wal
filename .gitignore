@@ -13,8 +13,9 @@ build/
 .classpath
 .settings/
 
-# Kotlin
+# Kotlin / Micronaut
 .kotlin/
+.micronaut/
 *.class
 *.jar
 *.war
