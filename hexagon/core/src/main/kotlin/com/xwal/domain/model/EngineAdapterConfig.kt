@@ -4,7 +4,7 @@ import java.time.Instant
 
 data class EngineAdapterConfig(
     val id: EngineAdapterId,
-    val name: String?,
+    val name: String,
     val engineType: EngineType,
     val config: Map<String, Any> = emptyMap(),
     val capabilities: AdapterCapabilities? = null,

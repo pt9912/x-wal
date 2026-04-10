@@ -13,8 +13,13 @@ dependencies {
     implementation("io.micronaut.data:micronaut-data-jdbc")
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     implementation("io.micronaut.flyway:micronaut-flyway")
+    runtimeOnly("org.flywaydb:flyway-database-postgresql")
+    implementation(libs.jackson.kotlin)
     runtimeOnly("org.postgresql:postgresql")
 
+    testImplementation("io.micronaut.test:micronaut-test-junit5")
+    testRuntimeOnly(libs.logback)
+    testRuntimeOnly("org.postgresql:postgresql")
     testImplementation(libs.testcontainers.core)
     testImplementation(libs.testcontainers.junit)
     testImplementation(libs.testcontainers.postgres)

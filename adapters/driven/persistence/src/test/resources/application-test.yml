@@ -1,0 +1,14 @@
+datasources:
+  default:
+    url: jdbc:tc:postgresql:16-alpine:///xwal_test
+    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+    dialect: POSTGRES
+
+flyway:
+  datasources:
+    default:
+      enabled: true
+      locations: classpath:db/migration
+      baseline-on-migrate: true
