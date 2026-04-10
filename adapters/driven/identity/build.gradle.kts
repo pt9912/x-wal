@@ -10,6 +10,7 @@ dependencies {
     ksp("io.micronaut:micronaut-inject-kotlin")
     ksp("io.micronaut.security:micronaut-security-annotations")
 
+    implementation("io.micronaut:micronaut-http")
     implementation("io.micronaut.security:micronaut-security-oauth2")
     implementation("io.micronaut.security:micronaut-security-jwt")
 }

@@ -1,0 +1,109 @@
+micronaut:
+  application:
+    name: x-wal-api
+  server:
+    port: 8080
+    cors:
+      enabled: true
+  security:
+    enabled: true
+    token:
+      jwt:
+        enabled: true
+        signatures:
+          jwks:
+            keycloak:
+              url: ${KEYCLOAK_JWKS_URL:http://localhost:8083/realms/xwal/protocol/openid-connect/certs}
+    oauth2:
+      enabled: true
+      clients:
+        keycloak:
+          client-id: ${KEYCLOAK_CLIENT_ID:xwal-api}
+          client-secret: ${KEYCLOAK_CLIENT_SECRET:}
+          openid:
+            issuer: ${KEYCLOAK_ISSUER:http://localhost:8083/realms/xwal}
+    intercept-url-map:
+      - pattern: /health
+        http-method: GET
+        access:
+          - isAnonymous()
+      - pattern: /swagger/**
+        access:
+          - isAnonymous()
+      - pattern: /swagger-ui/**
+        access:
+          - isAnonymous()
+      - pattern: /api/**
+        access:
+          - isAuthenticated()
+  http:
+    client:
+      follow-redirects: true
+      pool:
+        enabled: true
+        max-connections: 50
+      connect-timeout: 10s
+      read-timeout: 30s
+  serde:
+    serialization:
+      inclusion: NON_ABSENT
+
+grpc:
+  server:
+    port: 50051
+    keep-alive-time: 5m
+
+datasources:
+  default:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:xwal}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER:xwal}
+    password: ${DB_PASSWORD:xwal}
+    dialect: POSTGRES
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+flyway:
+  datasources:
+    default:
+      enabled: true
+      locations: classpath:db/migration
+      baseline-on-migrate: true
+      clean-disabled: true
+
+otel:
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: otlp
+  logs:
+    exporter: none
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      protocol: grpc
+  service:
+    name: x-wal-api
+  resource:
+    attributes:
+      service.name: x-wal-api
+      service.version: "2.0.0"
+      deployment.environment: ${ENVIRONMENT:development}
+
+xwal:
+  instance-sync:
+    enabled: true
+    scheduler:
+      fixed-delay: 30s
+      initial-delay: 10s
+    batch-size: 100
+
+logger:
+  levels:
+    com.xwal: INFO
+    io.micronaut: INFO
+    org.flywaydb: INFO
