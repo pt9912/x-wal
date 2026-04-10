@@ -8,7 +8,7 @@ RUN gradle :app:build -x test --no-daemon
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S xwal && adduser -S xwal -G xwal
 WORKDIR /app
-COPY --from=build /app/app/build/libs/app-*-all.jar app.jar
+COPY --from=build /app/app/build/libs/app-runner.jar app.jar
 USER xwal
 
 EXPOSE 8080 50051
