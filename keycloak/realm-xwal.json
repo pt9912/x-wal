@@ -1,0 +1,163 @@
+{
+  "realm": "xwal",
+  "enabled": true,
+  "displayName": "x-wal Workflow Abstraction Layer",
+  "loginTheme": "keycloak",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Full administrative access to x-wal API"
+      },
+      {
+        "name": "workflow-designer",
+        "description": "Can create and modify workflows"
+      },
+      {
+        "name": "workflow-executor",
+        "description": "Can start and manage workflow instances"
+      },
+      {
+        "name": "viewer",
+        "description": "Read-only access to workflows and instances"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "xwal-api",
+      "name": "x-wal API",
+      "description": "Backend API Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "access.token.lifespan": "300"
+      }
+    },
+    {
+      "clientId": "xwal-cli",
+      "name": "x-wal CLI Client",
+      "description": "CLI and testing client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ],
+      "webOrigins": [
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ],
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "roles"
+      ],
+      "optionalClientScopes": []
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@xwal.local",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"]
+    },
+    {
+      "username": "designer",
+      "enabled": true,
+      "email": "designer@xwal.local",
+      "firstName": "Designer",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "designer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["workflow-designer"]
+    },
+    {
+      "username": "executor",
+      "enabled": true,
+      "email": "executor@xwal.local",
+      "firstName": "Executor",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "executor123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["workflow-executor"]
+    },
+    {
+      "username": "viewer",
+      "enabled": true,
+      "email": "viewer@xwal.local",
+      "firstName": "Viewer",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["viewer"]
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "workflow.read",
+      "description": "Read access to workflows",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "workflow.write",
+      "description": "Write access to workflows",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    },
+    {
+      "name": "workflow.admin",
+      "description": "Admin access to workflows",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    }
+  ]
+}

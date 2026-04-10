@@ -1,0 +1,12 @@
+.git
+.gradle
+.kotlin
+.idea
+build
+**/build
+*.iml
+*.ipr
+*.iws
+.env
+local.properties
+docs/

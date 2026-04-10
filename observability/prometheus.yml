@@ -1,0 +1,36 @@
+# Prometheus Configuration
+# Sprint 2 Task 8 - M-07
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'xwal-dev'
+    environment: 'development'
+
+scrape_configs:
+  # OTel Collector Metrics
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+        labels:
+          service: 'otel-collector'
+
+  # OTel Collector Self-Monitoring
+  - job_name: 'otel-collector-internal'
+    static_configs:
+      - targets: ['otel-collector:8888']
+        labels:
+          service: 'otel-collector-internal'
+
+  # x-wal API Metrics (direct scrape - fallback)
+  - job_name: 'xwal-api'
+    static_configs:
+      - targets: ['app:8080']
+        labels:
+          service: 'xwal-api'
+
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
