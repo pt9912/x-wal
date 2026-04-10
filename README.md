@@ -136,10 +136,6 @@ Kanonisches JSON-Datenmodell fuer engineuebergreifende Workflow-Definitionen. Sc
 
 Unterstuetzte Task-Typen: `activity`, `decision`, `parallel`, `map`, `subworkflow`, `event`, `timer`, `userTask`.
 
-## Migriert von
-
-Dieses Projekt ist die hexagonale Kotlin-Migration von [x-wal-v1](../x-wal-v1/) (Java/Layered Architecture, ~13.500 LOC, ~340 Tests). Migrationsplan: [docs/hexagonal-migration.md](docs/hexagonal-migration.md).
-
 ## Lizenz
 
 MIT
