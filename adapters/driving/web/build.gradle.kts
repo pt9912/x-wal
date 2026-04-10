@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":hexagon:ports"))
-    implementation(project(":hexagon:core"))
+    // hexagon:core types are available transitively via hexagon:ports (api dependency)
 
     ksp("io.micronaut:micronaut-inject-kotlin")
     ksp("io.micronaut.serde:micronaut-serde-processor")

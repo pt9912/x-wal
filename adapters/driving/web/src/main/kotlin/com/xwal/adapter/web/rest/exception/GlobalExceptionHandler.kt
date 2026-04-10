@@ -7,6 +7,7 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Produces
 import io.micronaut.http.server.exceptions.ExceptionHandler
 import jakarta.inject.Singleton
+import jakarta.validation.ConstraintViolationException
 import org.slf4j.LoggerFactory
 
 @Singleton
@@ -52,6 +53,13 @@ class GlobalExceptionHandler : ExceptionHandler<Exception, HttpResponse<ErrorRes
                 log.error("Adapter operation failed: {}", exception.message, exception)
                 val error = ErrorResponse.internalError(exception.message).copy(instance = path)
                 HttpResponse.serverError(error)
+            }
+            is ConstraintViolationException -> {
+                val validationErrors = exception.constraintViolations.map {
+                    ErrorResponse.ValidationError(field = it.propertyPath.toString(), message = it.message)
+                }
+                val error = ErrorResponse.badRequest("Validation failed", validationErrors).copy(instance = path)
+                HttpResponse.badRequest(error)
             }
             is IllegalArgumentException -> {
                 val error = ErrorResponse.badRequest(exception.message ?: "Invalid argument").copy(instance = path)

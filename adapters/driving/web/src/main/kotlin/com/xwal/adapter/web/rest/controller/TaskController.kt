@@ -7,11 +7,16 @@ import com.xwal.domain.model.TaskFilter
 import com.xwal.domain.model.TaskId
 import com.xwal.domain.model.TaskStatus
 import com.xwal.domain.port.input.*
+import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.*
 import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule
+import io.micronaut.validation.Validated
+import jakarta.validation.Valid
 
 @Controller("/api/v1/tasks")
+@Validated
 @Secured(SecurityRule.IS_AUTHENTICATED)
 class TaskController(
     private val queryTasks: QueryTasksUseCase,
@@ -28,9 +33,15 @@ class TaskController(
         @QueryValue limit: Int?,
         @QueryValue offset: Int?
     ): List<TaskResponse> {
+        // Validate status parameter if provided
+        val taskStatus = status?.let {
+            runCatching { TaskStatus.valueOf(it.uppercase()) }.getOrElse {
+                throw IllegalArgumentException("Invalid task status: $status. Valid values: ${TaskStatus.entries.joinToString()}")
+            }
+        }
         val filter = TaskFilter(
             assignee = assignee,
-            status = status?.let { runCatching { TaskStatus.valueOf(it.uppercase()) }.getOrNull() },
+            status = taskStatus,
             limit = limit ?: 50,
             offset = offset ?: 0
         )
@@ -39,15 +50,10 @@ class TaskController(
 
     @Post("/{taskId}/complete")
     @Secured("workflow.write", "workflow.admin")
-    fun complete(taskId: String, @Body request: CompleteTaskRequest): TaskResponse {
+    fun complete(taskId: String, @Valid @Body request: CompleteTaskRequest): HttpResponse<TaskResponse> {
         val id = TaskId(taskId)
         completeTask.execute(CompleteTaskUseCase.Command(id, request.variables ?: emptyMap()))
-        // Fetch updated task after completion
-        return try {
-            TaskDtoMapper.toResponse(getTask.execute(id))
-        } catch (_: Exception) {
-            TaskResponse(id = taskId, status = "COMPLETED")
-        }
+        return HttpResponse.ok(TaskResponse(id = taskId, status = "COMPLETED"))
     }
 
     @Get("/{taskId}")

@@ -7,20 +7,26 @@ import com.xwal.adapter.web.rest.dto.response.WorkflowResponse
 import com.xwal.adapter.web.rest.mapper.InstanceDtoMapper
 import com.xwal.adapter.web.rest.mapper.WorkflowDtoMapper
 import com.xwal.domain.model.WorkflowId
+import com.xwal.domain.model.WorkflowStatus
 import com.xwal.domain.port.input.*
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
 import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule
+import io.micronaut.validation.Validated
+import jakarta.validation.Valid
 import java.util.UUID
 
 @Controller("/api/v1/workflows")
+@Validated
 @Secured(SecurityRule.IS_AUTHENTICATED)
 class WorkflowController(
     private val createWorkflow: CreateWorkflowUseCase,
     private val getWorkflow: GetWorkflowUseCase,
     private val listWorkflows: ListWorkflowsUseCase,
     private val startWorkflow: StartWorkflowUseCase,
+    private val updateWorkflow: UpdateWorkflowUseCase,
+    private val deleteWorkflow: DeleteWorkflowUseCase,
     private val suspendInstance: SuspendInstanceUseCase,
     private val resumeInstance: ResumeInstanceUseCase,
     private val cancelInstance: CancelInstanceUseCase
@@ -28,7 +34,7 @@ class WorkflowController(
 
     @Post
     @Secured("workflow.write", "workflow.admin")
-    fun create(@Body request: CreateWorkflowRequest): HttpResponse<WorkflowResponse> {
+    fun create(@Valid @Body request: CreateWorkflowRequest): HttpResponse<WorkflowResponse> {
         val workflow = createWorkflow.execute(
             CreateWorkflowUseCase.Command(
                 name = request.name,
@@ -50,8 +56,16 @@ class WorkflowController(
 
     @Get
     @Secured("workflow.read", "workflow.write", "workflow.admin")
-    fun list(): List<WorkflowResponse> {
-        return WorkflowDtoMapper.toResponseList(listWorkflows.execute())
+    fun list(@QueryValue status: String?): List<WorkflowResponse> {
+        val workflowStatus = status?.let { runCatching { WorkflowStatus.valueOf(it.uppercase()) }.getOrNull() }
+        return WorkflowDtoMapper.toResponseList(listWorkflows.execute(workflowStatus))
+    }
+
+    @Delete("/{id}")
+    @Secured("workflow.admin")
+    fun delete(id: UUID): HttpResponse<Void> {
+        deleteWorkflow.execute(WorkflowId(id))
+        return HttpResponse.noContent()
     }
 
     @Post("/{id}/start")
