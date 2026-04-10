@@ -1,0 +1,62 @@
+{
+  "name": "x-wal Development",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "fwcd.kotlin",
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle",
+        "redhat.java",
+        "ms-azuretools.vscode-docker",
+        "editorconfig.editorconfig",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.server.launchMode": "Standard",
+        "kotlin.languageServer.enabled": true,
+        "files.exclude": {
+          "**/.classpath": true,
+          "**/.project": true,
+          "**/.settings": true,
+          "**/.factorypath": true
+        }
+      }
+    }
+  },
+
+  "forwardPorts": [8080, 50051, 5432, 8083, 9090, 3000],
+  "portsAttributes": {
+    "8080": { "label": "API Server (REST)", "onAutoForward": "notify" },
+    "50051": { "label": "gRPC Server", "onAutoForward": "silent" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+    "8083": { "label": "Keycloak", "onAutoForward": "silent" },
+    "9090": { "label": "Prometheus", "onAutoForward": "silent" },
+    "3000": { "label": "Grafana", "onAutoForward": "silent" }
+  },
+
+  "postCreateCommand": "chmod +x gradlew && ./gradlew build --no-daemon",
+  "postStartCommand": "git config --global --add safe.directory /workspace",
+
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installGradle": "true",
+      "gradleVersion": "8.5"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    }
+  }
+}
