@@ -1,0 +1,84 @@
+[versions]
+kotlin = "2.3.20"
+ksp = "2.3.6"
+micronaut = "4.9.4"
+micronaut-plugin = "4.6.1"
+jackson = "2.16.0"
+grpc = "1.62.2"
+protobuf = "3.25.3"
+otel = "1.32.0"
+resilience4j = "2.1.0"
+camunda7 = "7.24.0"
+zeebe = "8.3.4"
+flowable = "7.0.0"
+logback = "1.4.14"
+junit = "5.10.1"
+mockk = "1.13.9"
+testcontainers = "1.19.3"
+assertj = "3.24.2"
+json-schema-validator = "2.0.0"
+picocli = "4.7.5"
+jgrapht = "1.5.2"
+slf4j = "2.0.9"
+logstash-encoder = "7.4"
+swagger = "2.2.19"
+
+[libraries]
+# Jackson
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+
+# JSON Schema
+json-schema-validator = { module = "com.networknt:json-schema-validator", version.ref = "json-schema-validator" }
+
+# gRPC
+grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
+grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
+grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
+grpc-testing = { module = "io.grpc:grpc-testing", version.ref = "grpc" }
+grpc-inprocess = { module = "io.grpc:grpc-inprocess", version.ref = "grpc" }
+
+# OpenTelemetry
+otel-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "otel" }
+otel-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "otel" }
+otel-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "otel" }
+otel-sdk-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "otel" }
+
+# Resilience
+resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
+resilience4j-retry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "resilience4j" }
+resilience4j-timelimiter = { module = "io.github.resilience4j:resilience4j-timelimiter", version.ref = "resilience4j" }
+
+# Workflow Engines
+camunda7-rest = { module = "org.camunda.bpm:camunda-engine-rest-core", version.ref = "camunda7" }
+zeebe-client = { module = "io.camunda:zeebe-client-java", version.ref = "zeebe" }
+flowable-engine = { module = "org.flowable:flowable-engine", version.ref = "flowable" }
+
+# Logging
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logstash-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-encoder" }
+
+# Testing
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgres = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+
+# Misc
+jgrapht = { module = "org.jgrapht:jgrapht-core", version.ref = "jgrapht" }
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
+swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+micronaut-application = { id = "io.micronaut.application", version.ref = "micronaut-plugin" }
+micronaut-library = { id = "io.micronaut.library", version.ref = "micronaut-plugin" }
+micronaut-test-resources = { id = "io.micronaut.test-resources", version.ref = "micronaut-plugin" }
+protobuf = { id = "com.google.protobuf", version = "0.9.4" }

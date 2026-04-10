@@ -1,0 +1,725 @@
+{
+    "$id": "https://example.org/iwm.schema.v0.2.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Intermediate Workflow Model (IWM) v0.2",
+    "type": "object",
+    "required": [
+        "workflow",
+        "tasks",
+        "edges"
+    ],
+    "properties": {
+        "extensions": {
+            "$ref": "#/definitions/extensionMap"
+        },
+        "meta": {
+            "$ref": "#/definitions/metaMap"
+        },
+        "layouts": {
+            "type": "array",
+            "description": "Sammlung visueller Layout-Informationen (z.B. BPMN-Diagramme) für verschiedene Editoren/Engines.",
+            "items": {
+                "$ref": "#/definitions/layoutView"
+            }
+        },
+        "workflow": {
+            "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "cron": {
+                    "type": "string"
+                },
+                "owners": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "extensions": {
+                    "$ref": "#/definitions/extensionMap"
+                },
+                "meta": {
+                    "$ref": "#/definitions/metaMap"
+                }
+            }
+        },
+        "tasks": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/taskUnion"
+            }
+        },
+        "edges": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "from",
+                    "to"
+                ],
+                "properties": {
+                    "from": {
+                        "type": "string"
+                    },
+                    "to": {
+                        "type": "string"
+                    },
+                    "condition": {
+                        "type": "string"
+                    },
+                    "expr": {
+                        "type": "object",
+                        "properties": {
+                            "lang": {
+                                "type": "string"
+                            },
+                            "source": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "extensions": {
+                        "$ref": "#/definitions/extensionMap"
+                    },
+                    "meta": {
+                        "$ref": "#/definitions/metaMap"
+                    }
+                }
+            }
+        },
+        "policies": {
+            "type": "object",
+            "properties": {
+                "defaultRetry": {
+                    "$ref": "#/definitions/retry"
+                },
+                "defaultTimeouts": {
+                    "$ref": "#/definitions/timeouts"
+                },
+                "concurrency": {
+                    "type": "integer"
+                }
+            }
+        },
+        "bpmn": {
+            "type": "object",
+            "properties": {
+                "laneAssignments": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "taskId": {
+                                "type": "string"
+                            },
+                            "lanes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "boundaryEvents": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "on",
+                            "type"
+                        ],
+                        "properties": {
+                            "on": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "enum": [
+                                    "timer",
+                                    "error",
+                                    "message",
+                                    "signal",
+                                    "escalation"
+                                ]
+                            },
+                            "interrupting": {
+                                "type": "boolean"
+                            },
+                            "timer": {
+                                "type": "string"
+                            },
+                            "errorRef": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "multiInstance": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "taskId",
+                            "kind"
+                        ],
+                        "properties": {
+                            "taskId": {
+                                "type": "string"
+                            },
+                            "kind": {
+                                "enum": [
+                                    "sequential",
+                                    "parallel"
+                                ]
+                            },
+                            "collection": {
+                                "type": "string"
+                            },
+                            "completion": {
+                                "enum": [
+                                    "all",
+                                    "atLeastOne",
+                                    "nOfM"
+                                ]
+                            },
+                            "maxConcurrency": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "compensations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "taskId": {
+                                "type": "string"
+                            },
+                            "compensateWith": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "eventSubprocess": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "trigger": {
+                                "enum": [
+                                    "message",
+                                    "signal",
+                                    "timer",
+                                    "error"
+                                ]
+                            },
+                            "interrupting": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "analysis": {
+            "type": "object",
+            "properties": {
+                "findings": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "id",
+                            "severity",
+                            "message"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "severity": {
+                                "enum": [
+                                    "INFO",
+                                    "WARN",
+                                    "ERROR"
+                                ]
+                            },
+                            "message": {
+                                "type": "string"
+                            },
+                            "location": {
+                                "type": "string"
+                            },
+                            "auto_migratable": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "taskCommon": {
+            "type": "object",
+            "required": [
+                "id",
+                "type"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "input": {
+                    "type": "object"
+                },
+                "output": {
+                    "type": "object"
+                },
+                "retry": {
+                    "$ref": "#/definitions/retry"
+                },
+                "timeouts": {
+                    "$ref": "#/definitions/timeouts"
+                },
+                "compensation": {
+                    "type": "string"
+                },
+                "idempotencyKey": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "extensions": {
+                    "$ref": "#/definitions/extensionMap"
+                },
+                "meta": {
+                    "$ref": "#/definitions/metaMap"
+                },
+                "user": {
+                    "type": "object",
+                    "properties": {
+                        "assignee": {
+                            "type": "string"
+                        },
+                        "candidateGroups": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "formKey": {
+                            "type": "string"
+                        },
+                        "dueDate": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "retry": {
+            "type": "object",
+            "properties": {
+                "maxAttempts": {
+                    "type": "integer"
+                },
+                "backoff": {
+                    "type": "string"
+                },
+                "nonRetryableErrors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "timeouts": {
+            "type": "object",
+            "properties": {
+                "startToClose": {
+                    "type": "string"
+                },
+                "scheduleToStart": {
+                    "type": "string"
+                }
+            }
+        },
+        "extensionMap": {
+            "type": "object",
+            "description": "Container für engine- oder projektspezifische Erweiterungen. Schlüssel entsprechen einem Namespace (z.B. camunda7.form).",
+            "patternProperties": {
+                "^[a-zA-Z0-9_.-]+$": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "metaMap": {
+            "type": "object",
+            "description": "Technische Metadaten (z.B. Quelle, Tool-Version, Audit-Timestamps). Schlüssel folgen einem Namespace (z.B. system.import).",
+            "patternProperties": {
+                "^[a-zA-Z0-9_.-]+$": {
+                    "type": [
+                        "string",
+                        "number",
+                        "integer",
+                        "boolean",
+                        "object",
+                        "array",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "layoutBounds": {
+            "type": "object",
+            "required": [
+                "x",
+                "y"
+            ],
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "width": {
+                    "type": "number"
+                },
+                "height": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "layoutWaypoint": {
+            "type": "object",
+            "required": [
+                "x",
+                "y"
+            ],
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "layoutNode": {
+            "type": "object",
+            "required": [
+                "elementId"
+            ],
+            "properties": {
+                "elementId": {
+                    "type": "string"
+                },
+                "bounds": {
+                    "$ref": "#/definitions/layoutBounds"
+                },
+                "laneId": {
+                    "type": "string"
+                },
+                "style": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "meta": {
+                    "$ref": "#/definitions/metaMap"
+                },
+                "extensions": {
+                    "$ref": "#/definitions/extensionMap"
+                }
+            },
+            "additionalProperties": false
+        },
+        "layoutEdge": {
+            "type": "object",
+            "required": [
+                "from",
+                "to"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                },
+                "waypoints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/layoutWaypoint"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/metaMap"
+                },
+                "extensions": {
+                    "$ref": "#/definitions/extensionMap"
+                }
+            },
+            "additionalProperties": false
+        },
+        "layoutView": {
+            "type": "object",
+            "required": [
+                "id",
+                "type",
+                "nodes"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "Art der Darstellung, z.B. bpmn-diagram, graph",
+                    "minLength": 1
+                },
+                "engine": {
+                    "type": "string",
+                    "description": "Optionaler Name der Quell-/Zielengine (z.B. camunda7, camunda8)."
+                },
+                "nodes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/layoutNode"
+                    }
+                },
+                "edges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/layoutEdge"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/metaMap"
+                },
+                "extensions": {
+                    "$ref": "#/definitions/extensionMap"
+                }
+            },
+            "additionalProperties": false
+        },
+        "activity": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "activity"
+                        },
+                        "operation": {
+                            "type": "string"
+                        },
+                        "queue": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "decision": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "decision"
+                        },
+                        "expr": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "parallel": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "parallel"
+                        },
+                        "branches": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "map": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "map"
+                        },
+                        "collection": {
+                            "type": "string"
+                        },
+                        "concurrency": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            ]
+        },
+        "subworkflow": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "subworkflow"
+                        },
+                        "ref": {
+                            "type": "string"
+                        },
+                        "version": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "event": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "event"
+                        },
+                        "kind": {
+                            "enum": [
+                                "signal",
+                                "message"
+                            ]
+                        },
+                        "topic": {
+                            "type": "string"
+                        },
+                        "correlationKey": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "timer": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "timer"
+                        },
+                        "duration": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "userTask": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/taskCommon"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "userTask"
+                        }
+                    }
+                }
+            ]
+        },
+        "taskUnion": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/activity"
+                },
+                {
+                    "$ref": "#/definitions/decision"
+                },
+                {
+                    "$ref": "#/definitions/parallel"
+                },
+                {
+                    "$ref": "#/definitions/map"
+                },
+                {
+                    "$ref": "#/definitions/subworkflow"
+                },
+                {
+                    "$ref": "#/definitions/event"
+                },
+                {
+                    "$ref": "#/definitions/timer"
+                },
+                {
+                    "$ref": "#/definitions/userTask"
+                }
+            ]
+        }
+    }
+}
