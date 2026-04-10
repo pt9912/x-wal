@@ -12,6 +12,8 @@ dependencies {
     ksp("io.micronaut.security:micronaut-security-annotations")
 
     implementation("io.micronaut:micronaut-http-server-netty")
+    implementation("io.projectreactor:reactor-core")
+    implementation("jakarta.validation:jakarta.validation-api")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
     implementation("io.micronaut.validation:micronaut-validation")
     implementation("io.micronaut.security:micronaut-security-oauth2")
