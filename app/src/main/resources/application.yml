@@ -101,6 +101,12 @@ xwal:
       fixed-delay: 30s
       initial-delay: 10s
     batch-size: 100
+    timeout: 5s
+    include-suspended: true
+    retry:
+      enabled: true
+      max-attempts: 3
+      backoff: 1s
 
 logger:
   levels:

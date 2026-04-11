@@ -2,6 +2,7 @@ package com.xwal.factory
 
 import com.xwal.application.service.AdapterResolutionService
 import com.xwal.application.usecase.adapter.*
+import com.xwal.application.usecase.sync.SyncInstanceStateOptions
 import com.xwal.application.usecase.sync.SyncInstanceStateUseCaseImpl
 import com.xwal.config.InstanceSyncConfig
 import com.xwal.domain.port.input.*
@@ -40,7 +41,18 @@ class AdapterUseCaseFactory {
     fun syncInstanceStateUseCase(
         instanceRepository: InstanceRepository,
         adapterResolution: AdapterResolutionService,
+        distributedLock: DistributedLockPort,
         syncConfig: InstanceSyncConfig
-    ): SyncInstanceStateUseCase =
-        SyncInstanceStateUseCaseImpl(instanceRepository, adapterResolution, syncConfig.batchSize)
+    ): SyncInstanceStateUseCase {
+        val syncOptions = SyncInstanceStateOptions(
+            batchSize = syncConfig.batchSize,
+            timeout = syncConfig.timeout,
+            includeSuspended = syncConfig.includeSuspended,
+            retryEnabled = syncConfig.retry.enabled,
+            retryMaxAttempts = syncConfig.retry.maxAttempts,
+            retryBackoff = syncConfig.retry.backoff
+        )
+
+        return SyncInstanceStateUseCaseImpl(instanceRepository, adapterResolution, distributedLock, syncOptions)
+    }
 }

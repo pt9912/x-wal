@@ -18,6 +18,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("io.micronaut.test:micronaut-test-junit5")
+    testImplementation("io.micronaut.serde:micronaut-serde-jackson")
     testRuntimeOnly(libs.logback)
     testRuntimeOnly("org.postgresql:postgresql")
     testImplementation(libs.testcontainers.core)

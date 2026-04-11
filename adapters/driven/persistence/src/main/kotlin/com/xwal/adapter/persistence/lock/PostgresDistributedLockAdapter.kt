@@ -5,6 +5,7 @@ import jakarta.inject.Singleton
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.time.Duration
+import kotlin.math.min
 import javax.sql.DataSource
 
 /**
@@ -23,16 +24,24 @@ class PostgresDistributedLockAdapter(
     override fun <T> withLock(lockKey: String, timeout: Duration, block: () -> T): T {
         val (classId, objId) = lockIds(lockKey)
         val connection = dataSource.connection
+        var acquired = false
+
         return try {
-            if (!tryAdvisoryLock(connection, classId, objId)) {
+            acquired = acquireWithTimeout(connection, lockKey, classId, objId, timeout)
+            if (!acquired) {
                 throw IllegalStateException("Could not acquire lock: $lockKey")
             }
             log.debug("Acquired advisory lock: {} (class={}, obj={})", lockKey, classId, objId)
             block()
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw IllegalStateException("Interrupted while waiting for lock: $lockKey", e)
         } finally {
-            releaseAdvisoryLock(connection, classId, objId)
+            if (acquired) {
+                releaseAdvisoryLock(connection, classId, objId)
+                log.debug("Released advisory lock: {}", lockKey)
+            }
             connection.close()
-            log.debug("Released advisory lock: {}", lockKey)
         }
     }
 
@@ -44,7 +53,7 @@ class PostgresDistributedLockAdapter(
         val (classId, objId) = lockIds(lockKey)
         val connection = dataSource.connection
         return try {
-            tryAdvisoryLock(connection, classId, objId)
+            acquireWithTimeout(connection, lockKey, classId, objId, timeout)
         } catch (e: Exception) {
             log.warn("Failed to acquire advisory lock {}: {}", lockKey, e.message)
             false
@@ -72,6 +81,39 @@ class PostgresDistributedLockAdapter(
         }
     }
 
+    private fun acquireWithTimeout(
+        connection: Connection,
+        lockKey: String,
+        classId: Int,
+        objId: Int,
+        timeout: Duration
+    ): Boolean {
+        if (timeout.isZero || timeout.isNegative) {
+            return tryAdvisoryLock(connection, classId, objId)
+        }
+
+        val deadlineNanos = System.nanoTime() + timeout.toNanos()
+        while (true) {
+            if (tryAdvisoryLock(connection, classId, objId)) {
+                return true
+            }
+
+            val remainingNanos = deadlineNanos - System.nanoTime()
+            if (remainingNanos <= 0) {
+                log.debug("Timed out waiting for advisory lock: {}", lockKey)
+                return false
+            }
+
+            val sleepNanos = min(remainingNanos, LOCK_POLL_INTERVAL.toNanos())
+            if (sleepNanos > 0) {
+                Thread.sleep(
+                    sleepNanos / NANO_PER_MILLI,
+                    (sleepNanos % NANO_PER_MILLI).toInt()
+                )
+            }
+        }
+    }
+
     private fun releaseAdvisoryLock(connection: Connection, classId: Int, objId: Int) {
         connection.prepareStatement("SELECT pg_advisory_unlock(?, ?)").use { stmt ->
             stmt.setInt(1, classId)
@@ -91,5 +133,7 @@ class PostgresDistributedLockAdapter(
     companion object {
         /** Fixed class ID for all x-wal advisory locks */
         private const val XWAL_LOCK_CLASS = 0x5857414C // "XWAL" as int
+        private val LOCK_POLL_INTERVAL: Duration = Duration.ofMillis(100)
+        private const val NANO_PER_MILLI: Long = 1_000_000
     }
 }
