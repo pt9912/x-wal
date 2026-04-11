@@ -27,8 +27,6 @@ class Camunda7RestClient(
         val body = MultipartBody.builder()
             .addPart("deployment-name", deploymentName)
             .addPart("deployment-source", "x-wal")
-            .addPart("enable-duplicate-filtering", "true")
-            .addPart("deploy-changed-only", "true")
             .addPart("$processName.bpmn", processName, MediaType.APPLICATION_XML_TYPE, bpmnXml.toByteArray())
             .build()
 
