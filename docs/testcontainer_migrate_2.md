@@ -7,6 +7,14 @@
 
 ---
 
+## Release-Notiz
+
+- **Datum:** 2026-04-11  
+- **Bereich:** Dokumentation / CI  
+- **Änderung:** Den in der Migrationsdoku verwendeten Verweis auf `gradle/libs.versions.toml` auf einen repo-relativen Link umgestellt, damit der CI-Markdown-Link-Check ohne harte Pfade korrekt läuft.
+
+---
+
 ## 1. Zusammenfassung der Breaking Changes
 
 Testcontainers 2.0 bringt folgende wesentliche Änderungen:
