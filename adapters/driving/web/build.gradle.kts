@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.micronaut.library)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.protobuf)
 }
 
 dependencies {
@@ -21,9 +22,29 @@ dependencies {
     implementation("io.micronaut.grpc:micronaut-grpc-server-runtime")
     implementation(libs.grpc.protobuf)
     implementation(libs.grpc.stub)
+    implementation(libs.grpc.netty)
     implementation(libs.swagger.annotations)
+    implementation("javax.annotation:javax.annotation-api:1.3.2")
 }
 
 micronaut {
     version(providers.gradleProperty("micronautVersion").get())
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.get()}"
+    }
+    plugins {
+        create("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:${libs.versions.grpc.get()}"
+        }
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                create("grpc")
+            }
+        }
+    }
 }

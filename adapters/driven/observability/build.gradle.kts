@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":hexagon:ports"))
+
     ksp("io.micronaut:micronaut-inject-kotlin")
 
     implementation("io.micronaut.tracing:micronaut-tracing-opentelemetry")

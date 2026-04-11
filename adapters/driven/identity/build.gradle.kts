@@ -13,6 +13,8 @@ dependencies {
     implementation("io.micronaut:micronaut-http")
     implementation("io.micronaut.security:micronaut-security-oauth2")
     implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation(libs.grpc.stub)
+    implementation("io.grpc:grpc-api:${libs.versions.grpc.get()}")
 }
 
 micronaut {

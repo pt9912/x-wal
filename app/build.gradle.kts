@@ -17,6 +17,8 @@ dependencies {
 
     ksp("io.micronaut:micronaut-inject-kotlin")
 
+    implementation(libs.otel.api)
+
     runtimeOnly(libs.logback)
     runtimeOnly(libs.logstash.encoder)
 
