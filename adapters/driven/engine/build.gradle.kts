@@ -22,6 +22,8 @@ dependencies {
     testImplementation(libs.testcontainers.core)
     testImplementation(libs.testcontainers.junit)
     testImplementation(libs.assertj)
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("io.micronaut.serde:micronaut-serde-jackson")
 }
 
 micronaut {
