@@ -3,6 +3,7 @@ package com.xwal.factory
 import com.xwal.application.service.AdapterResolutionService
 import com.xwal.application.usecase.adapter.*
 import com.xwal.application.usecase.sync.SyncInstanceStateUseCaseImpl
+import com.xwal.config.InstanceSyncConfig
 import com.xwal.domain.port.input.*
 import com.xwal.domain.port.output.*
 import io.micronaut.context.annotation.Factory
@@ -39,7 +40,7 @@ class AdapterUseCaseFactory {
     fun syncInstanceStateUseCase(
         instanceRepository: InstanceRepository,
         adapterResolution: AdapterResolutionService,
-        @io.micronaut.context.annotation.Value("\${xwal.instance-sync.batch-size:100}") batchSize: Int
+        syncConfig: InstanceSyncConfig
     ): SyncInstanceStateUseCase =
-        SyncInstanceStateUseCaseImpl(instanceRepository, adapterResolution, batchSize)
+        SyncInstanceStateUseCaseImpl(instanceRepository, adapterResolution, syncConfig.batchSize)
 }
