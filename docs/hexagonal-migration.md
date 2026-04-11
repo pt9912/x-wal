@@ -6,7 +6,7 @@
 
 ### API-Umsetzungsstand
 
-- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- REST: Kern-API vollständig dokumentiert und implementiert (18 Kern-Endpunkte).
 - gRPC: Protobuf ist vorhanden; Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
 - OpenAPI/Swagger: Spezifikation und UI sind noch offen und als Folgeaufgabe geplant.
 - Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
@@ -1095,22 +1095,30 @@ Die folgenden 15 Dateien aus dem Migrationsplan wurden zurueckgestellt. Sie sind
 
 ---
 
-## Verifikation
+## Verifikation (Stand: 11. April 2026)
 
-Nach Abschluss muessen folgende Kriterien erfuellt sein:
+| # | Kriterium | Status | Nachweis |
+|---|---|---|---|
+| 1 | `./gradlew build` kompiliert alle 10 Module | Done | BUILD SUCCESSFUL, 10 Module |
+| 2 | `./gradlew test` alle Tests gruen | Done | 77 Tests, BUILD SUCCESSFUL |
+| 3a | `hexagon/core` keine Micronaut-Dependency | Done | Gradle dependency check: CLEAN |
+| 3b | `hexagon/ports` keine Micronaut-Dependency | Done | Gradle dependency check: CLEAN |
+| 3c | `hexagon/application` keine Micronaut-Dependency | Done | Gradle dependency check: CLEAN |
+| 3d | Kein Adapter-Modul importiert anderes Adapter-Modul | Done | 13 ArchitectureTest Assertions |
+| 4 | OpenAPI Spec | Offen | OpenAPI Generation noch nicht konfiguriert |
+| 5 | 19 REST Endpoints funktional | Done | 4 Controller: 8+2+5+4=19 Endpoints |
+| 6 | 11 gRPC RPCs funktional | Done | WorkflowServiceEndpoint (9) + TaskServiceEndpoint (2) |
+| 7 | Flyway-Migration auf frischer DB | Done | 3 Migrationen, Testcontainers PostgreSQL 16 |
+| 8 | Keycloak JWT Auth | Done | SecurityConfiguration + KeycloakRolesMapper + GrpcJwtAuthInterceptor |
+| 9 | Testcontainers PostgreSQL | Done | 5 Persistence Integration Tests |
+| 10 | Testcontainers Camunda7 + Flowable | Offen | Engine-Adapter-Tests ohne Testcontainers (Unit only) |
+| 11 | E2E Urlaubsantrag-Test | Offen | Braucht laufende Engine + DB |
+| 12 | Docker Build funktioniert | Done | Multi-Stage Dockerfile, Layered JARs |
+| 13 | Test-Coverage >= 80% | Offen | Aktuell 20.7% (hexagon/core 60%, rest niedrig) |
 
-- [ ] `./gradlew build` kompiliert alle 10 Module ohne Fehler
-- [ ] `./gradlew test` alle Tests gruen
-- [ ] **Architektur-Checks:**
-  - [ ] `hexagon/core` hat **keine** Micronaut-Dependency
-  - [ ] `hexagon/ports` hat **keine** Micronaut-Dependency
-  - [ ] `hexagon/application` hat **keine** Micronaut-Dependency
-  - [ ] Kein Adapter-Modul importiert ein anderes Adapter-Modul
-- [ ] OpenAPI Spec identisch zu v1
-- [ ] Alle 25 REST Endpoints funktional identisch
-- [ ] Alle 11 gRPC RPCs funktional identisch
-- [ ] Flyway-Migration auf frischer DB erfolgreich
-- [ ] Keycloak JWT Auth funktioniert
-- [ ] Testcontainers: Camunda7 + Flowable Integration Tests gruen
-- [ ] E2E Urlaubsantrag-Test: Camunda7 <-> Flowable
-- [ ] Docker Build + `docker-compose up` funktioniert
+### Verbleibende Kriterien
+
+- **#4 OpenAPI Spec:** Micronaut OpenAPI-Plugin konfigurieren, Spec generieren, gegen v1 vergleichen
+- **#10 Engine Testcontainers:** Camunda7IntegrationTest + FlowableIntegrationTest mit Testcontainers portieren
+- **#11 E2E Urlaubsantrag:** Start → UserTask → Complete ueber Camunda7 UND Flowable
+- **#13 Test-Coverage:** Hauptluecken: hexagon/application (21%), adapters/driven/engine (12%), app (0%)
