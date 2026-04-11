@@ -2,7 +2,7 @@
 
 ## API-Umsetzungsstand
 
-- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- REST: Kern-API vollständig dokumentiert und implementiert (18 Kern-Endpunkte).
 - gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
 - OpenAPI/Swagger: Spezifikation und UI sind noch offen und werden als Folgeaufgabe geführt.
 - Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
@@ -33,6 +33,7 @@ docker run -d \
   -p 8080:8080 \
   -p 50051:50051 \
   -e DB_HOST=host.docker.internal \
+  # Hinweis: Unter Linux ist host.docker.internal nicht immer verfügbar; ggf. --add-host=host.docker.internal:host-gateway nutzen.
   -e DB_PORT=5432 \
   -e DB_NAME=xwal \
   -e DB_USER=xwal \

@@ -4,6 +4,7 @@ import com.xwal.application.service.AdapterResolutionService
 import com.xwal.domain.model.*
 import com.xwal.domain.port.input.RegisterAdapterUseCase
 import com.xwal.domain.port.input.RegisterAdapterUseCase.Command
+import com.xwal.domain.port.output.AdapterInstanceCachePort
 import com.xwal.domain.port.output.EngineAdapterConfigRepository
 import com.xwal.domain.port.output.TransactionPort
 import org.slf4j.LoggerFactory
@@ -12,6 +13,7 @@ import java.time.Instant
 class RegisterAdapterUseCaseImpl(
     private val adapterConfigRepository: EngineAdapterConfigRepository,
     private val adapterResolution: AdapterResolutionService,
+    private val adapterCache: AdapterInstanceCachePort,
     private val transactionPort: TransactionPort
 ) : RegisterAdapterUseCase {
 
@@ -42,12 +44,22 @@ class RegisterAdapterUseCaseImpl(
             try {
                 val adapter = adapterResolution.resolveByConfig(saved)
                 val healthy = adapter.checkHealth()
-                val status = if (healthy) HealthStatus.HEALTHY else HealthStatus.UNHEALTHY
-                val updated = saved.copy(healthStatus = status, lastHealthCheck = Instant.now())
+                val updated = if (healthy) {
+                    saved.copy(healthStatus = HealthStatus.HEALTHY, lastHealthCheck = Instant.now())
+                } else {
+                    adapterCache.evict(saved.id)
+                    saved.copy(enabled = false, healthStatus = HealthStatus.UNHEALTHY, lastHealthCheck = Instant.now())
+                }
                 adapterConfigRepository.update(updated)
             } catch (e: Exception) {
                 log.warn("Initial health check failed for {}: {}", saved.name, e.message)
-                saved
+                adapterCache.evict(saved.id)
+                val updated = saved.copy(
+                    enabled = false,
+                    healthStatus = HealthStatus.UNHEALTHY,
+                    lastHealthCheck = Instant.now()
+                )
+                adapterConfigRepository.update(updated)
             }
         }
     }

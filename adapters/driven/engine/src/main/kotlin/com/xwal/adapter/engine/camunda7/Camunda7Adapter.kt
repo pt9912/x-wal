@@ -13,10 +13,10 @@ import java.time.Instant
 import java.util.function.Supplier
 
 class Camunda7Adapter(
-    httpClient: HttpClient,
+    private val httpClient: HttpClient,
     baseUrl: String,
     private val resilienceConfig: Resilience4jConfig = Resilience4jConfig()
-) : WorkflowEnginePort {
+) : WorkflowEnginePort, AutoCloseable {
 
     private val log = LoggerFactory.getLogger(Camunda7Adapter::class.java)
     private val restClient = Camunda7RestClient(httpClient, baseUrl)
@@ -137,8 +137,16 @@ class Camunda7Adapter(
             "engineVersion" to version,
             "engineType" to engineType.name,
             "healthy" to healthy,
-            "timestamp" to Instant.now().toString()
+                "timestamp" to Instant.now().toString()
         )
+    }
+
+    override fun close() {
+        try {
+            httpClient.close()
+        } catch (e: Exception) {
+            log.warn("Failed to close Camunda7 HttpClient: {}", e.message)
+        }
     }
 
     // ========== Private Helpers ==========

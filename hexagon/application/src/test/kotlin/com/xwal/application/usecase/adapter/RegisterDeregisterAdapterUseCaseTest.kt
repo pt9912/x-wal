@@ -22,7 +22,7 @@ class RegisterDeregisterAdapterUseCaseTest {
     private val adapter = mockk<WorkflowEnginePort>()
 
     private val adapterResolution = AdapterResolutionService(adapterConfigRepository, adapterCache, adapterFactory)
-    private val registerUseCase = RegisterAdapterUseCaseImpl(adapterConfigRepository, adapterResolution, transactionPort)
+    private val registerUseCase = RegisterAdapterUseCaseImpl(adapterConfigRepository, adapterResolution, adapterCache, transactionPort)
     private val deregisterUseCase = DeregisterAdapterUseCaseImpl(adapterConfigRepository, adapterCache, instanceRepository, transactionPort)
 
     private val adapterId = EngineAdapterId.generate()
@@ -32,19 +32,64 @@ class RegisterDeregisterAdapterUseCaseTest {
     @BeforeEach
     fun setup() {
         every { transactionPort.executeInTransaction(any<() -> Any>()) } answers { firstArg<() -> Any>().invoke() }
+        every { adapterCache.evict(any()) } just runs
+        every { adapterCache.put(any(), any()) } just runs
     }
 
     @Test
     fun `registers adapter with health check`() {
         every { adapterConfigRepository.save(any()) } answers { firstArg() }
-        every { adapterCache.get(any()) } returns null
         every { adapterFactory.createAdapter(EngineType.CAMUNDA7, any()) } returns adapter
-        every { adapterCache.put(any(), any()) } just runs
+        every { adapterCache.get(any()) } returns null
         every { adapter.checkHealth() } returns true
         every { adapterConfigRepository.update(any()) } answers { firstArg() }
 
         val result = registerUseCase.execute(RegisterAdapterUseCase.Command("test", EngineType.CAMUNDA7, "http://localhost", createdBy = null))
         assertEquals(HealthStatus.HEALTHY, result.healthStatus)
+    }
+
+    @Test
+    fun `registers adapter as unhealthy when health check fails`() {
+        val saved = slot<EngineAdapterConfig>()
+        val updated = slot<EngineAdapterConfig>()
+
+        every { adapterCache.get(any()) } returns null
+        every { adapterConfigRepository.save(capture(saved)) } answers { firstArg() }
+        every { adapterFactory.createAdapter(EngineType.CAMUNDA7, any()) } returns adapter
+        every { adapter.checkHealth() } returns false
+        every { adapterCache.put(any(), any()) } just runs
+        every { adapterCache.evict(any()) } just runs
+        every { adapterConfigRepository.update(capture(updated)) } answers { firstArg() }
+
+        val result = registerUseCase.execute(RegisterAdapterUseCase.Command("test", EngineType.CAMUNDA7, "http://localhost", createdBy = null))
+
+        verify { adapterCache.evict(saved.captured.id) }
+        assertEquals(HealthStatus.UNHEALTHY, result.healthStatus)
+        assertEquals(false, result.enabled)
+        assertEquals(HealthStatus.UNHEALTHY, updated.captured.healthStatus)
+        assertEquals(false, updated.captured.enabled)
+    }
+
+    @Test
+    fun `registers adapter as unhealthy when initial health check throws`() {
+        val saved = slot<EngineAdapterConfig>()
+        val updated = slot<EngineAdapterConfig>()
+
+        every { adapterCache.get(any()) } returns null
+        every { adapterConfigRepository.save(capture(saved)) } answers { firstArg() }
+        every { adapterFactory.createAdapter(EngineType.CAMUNDA7, any()) } returns adapter
+        every { adapter.checkHealth() } throws RuntimeException("boom")
+        every { adapterCache.put(any(), any()) } just runs
+        every { adapterCache.evict(any()) } just runs
+        every { adapterConfigRepository.update(capture(updated)) } answers { firstArg() }
+
+        val result = registerUseCase.execute(RegisterAdapterUseCase.Command("test", EngineType.CAMUNDA7, "http://localhost", createdBy = null))
+
+        verify { adapterCache.evict(saved.captured.id) }
+        assertEquals(HealthStatus.UNHEALTHY, result.healthStatus)
+        assertEquals(false, result.enabled)
+        assertEquals(HealthStatus.UNHEALTHY, updated.captured.healthStatus)
+        assertEquals(false, updated.captured.enabled)
     }
 
     @Test

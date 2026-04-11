@@ -87,7 +87,7 @@ class FactoryWiringTest {
     @Test fun `AdapterUseCaseFactory creates all use cases`() {
         val syncConfig = InstanceSyncConfig()
         val factory = AdapterUseCaseFactory()
-        assertNotNull(factory.registerAdapterUseCase(adapterConfigRepo, adapterResolution, transactionPort))
+        assertNotNull(factory.registerAdapterUseCase(adapterConfigRepo, adapterResolution, adapterCache, transactionPort))
         assertNotNull(factory.deregisterAdapterUseCase(adapterConfigRepo, adapterCache, instanceRepo, transactionPort))
         assertNotNull(factory.healthCheckAdapterUseCase(adapterConfigRepo, adapterResolution))
         assertNotNull(factory.syncInstanceStateUseCase(instanceRepo, adapterResolution, distributedLock, syncConfig))

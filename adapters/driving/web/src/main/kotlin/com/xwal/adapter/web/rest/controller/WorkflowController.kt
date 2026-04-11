@@ -57,7 +57,12 @@ class WorkflowController(
     @Get
     @Secured("workflow.read", "workflow.write", "workflow.admin")
     fun list(@QueryValue status: String?): List<WorkflowResponse> {
-        val workflowStatus = status?.let { runCatching { WorkflowStatus.valueOf(it.uppercase()) }.getOrNull() }
+        val workflowStatus = status?.let {
+            runCatching { WorkflowStatus.valueOf(it.uppercase()) }
+                .getOrElse {
+                    throw IllegalArgumentException("Invalid workflow status: $it. Valid values: ${WorkflowStatus.entries.joinToString()}")
+                }
+        }
         return WorkflowDtoMapper.toResponseList(listWorkflows.execute(workflowStatus))
     }
 

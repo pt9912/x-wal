@@ -13,10 +13,10 @@ import java.time.Instant
 import java.util.function.Supplier
 
 class FlowableAdapter(
-    httpClient: HttpClient,
+    private val httpClient: HttpClient,
     baseUrl: String,
     private val resilienceConfig: Resilience4jConfig = Resilience4jConfig()
-) : WorkflowEnginePort {
+) : WorkflowEnginePort, AutoCloseable {
 
     private val log = LoggerFactory.getLogger(FlowableAdapter::class.java)
     private val restClient = FlowableRestClient(httpClient, baseUrl)
@@ -127,6 +127,14 @@ class FlowableAdapter(
         "healthy" to checkHealth(),
         "timestamp" to Instant.now().toString()
     )
+
+    override fun close() {
+        try {
+            httpClient.close()
+        } catch (e: Exception) {
+            log.warn("Failed to close Flowable HttpClient: {}", e.message)
+        }
+    }
 
     private fun convertToTask(node: com.fasterxml.jackson.databind.JsonNode): Task = Task(
         taskId = TaskId.of(EngineType.FLOWABLE, node.path("id").asText("")),

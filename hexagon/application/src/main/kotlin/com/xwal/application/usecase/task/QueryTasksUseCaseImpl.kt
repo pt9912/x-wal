@@ -45,6 +45,10 @@ class QueryTasksUseCaseImpl(
             }
         }
 
-        return TaskAggregationLogic.sortAndPaginate(allTasks, filter.offset, filter.limit)
+        val filteredTasks = filter.status?.let { requested ->
+            allTasks.filter { it.status == requested }
+        } ?: allTasks
+
+        return TaskAggregationLogic.sortAndPaginate(filteredTasks, filter.offset, filter.limit)
     }
 }

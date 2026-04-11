@@ -21,11 +21,11 @@ object GrpcWorkflowMapper {
             .setUpdatedAt(workflow.updatedAt.toEpochMilli())
             .build()
 
-    fun toProtoInstance(instance: WorkflowInstance): ProtoInstance =
+    fun toProtoInstance(instance: WorkflowInstance, engineType: String): ProtoInstance =
         ProtoInstance.newBuilder()
             .setId(instance.id.value.toString())
             .setWorkflowId(instance.workflowId.value.toString())
-            .setEngineType(instance.engineAdapterId?.value?.toString() ?: "")
+            .setEngineType(engineType)
             .setEngineInstanceId(instance.engineInstanceId ?: "")
             .setStatus(instance.status.name)
             .setStartedAt(instance.startedAt?.toEpochMilli() ?: 0)
@@ -47,7 +47,9 @@ object GrpcWorkflowMapper {
 
     /** Convert google.protobuf.Struct → Map<String, Any> */
     fun structToMap(struct: Struct): Map<String, Any> =
-        struct.fieldsMap.mapValues { valueToAny(it.value) }
+        struct.fieldsMap.mapNotNull { (name, value) ->
+            valueToAny(value)?.let { name to it }
+        }.toMap()
 
     private fun anyToValue(v: Any?): Value = when (v) {
         null -> Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build()
@@ -66,13 +68,13 @@ object GrpcWorkflowMapper {
         else -> Value.newBuilder().setStringValue(v.toString()).build()
     }
 
-    private fun valueToAny(v: Value): Any = when (v.kindCase) {
+    private fun valueToAny(v: Value): Any? = when (v.kindCase) {
         Value.KindCase.STRING_VALUE -> v.stringValue
         Value.KindCase.NUMBER_VALUE -> v.numberValue
         Value.KindCase.BOOL_VALUE -> v.boolValue
         Value.KindCase.STRUCT_VALUE -> structToMap(v.structValue)
-        Value.KindCase.LIST_VALUE -> v.listValue.valuesList.map { valueToAny(it) }
-        Value.KindCase.NULL_VALUE -> "null"
+        Value.KindCase.LIST_VALUE -> v.listValue.valuesList.mapNotNull { valueToAny(it) }
+        Value.KindCase.NULL_VALUE -> null
         else -> v.toString()
     }
 }

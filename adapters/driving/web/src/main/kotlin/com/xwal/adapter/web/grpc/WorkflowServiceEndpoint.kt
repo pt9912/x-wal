@@ -3,8 +3,10 @@ package com.xwal.adapter.web.grpc
 import com.xwal.adapter.web.grpc.mapper.GrpcWorkflowMapper
 import com.xwal.adapter.web.grpc.proto.*
 import com.xwal.domain.model.InstanceId
+import com.xwal.domain.model.EngineAdapterId
 import com.xwal.domain.model.WorkflowId
 import com.xwal.domain.port.input.*
+import com.xwal.domain.port.output.EngineAdapterConfigRepository
 import io.grpc.stub.StreamObserver
 import jakarta.inject.Singleton
 import java.util.UUID
@@ -19,7 +21,8 @@ class WorkflowServiceEndpoint(
     private val suspendInstance: SuspendInstanceUseCase,
     private val resumeInstance: ResumeInstanceUseCase,
     private val cancelInstance: CancelInstanceUseCase,
-    private val getInstanceVariables: GetInstanceVariablesUseCase
+    private val getInstanceVariables: GetInstanceVariablesUseCase,
+    private val adapterConfigRepository: EngineAdapterConfigRepository
 ) : WorkflowServiceGrpc.WorkflowServiceImplBase() {
 
     override fun createWorkflow(request: CreateWorkflowRequest, responseObserver: StreamObserver<WorkflowResponse>) =
@@ -38,10 +41,13 @@ class WorkflowServiceEndpoint(
 
     override fun listWorkflows(request: ListWorkflowsRequest, responseObserver: StreamObserver<ListWorkflowsResponse>) =
         GrpcErrorMapper.handle(responseObserver) {
-            val workflows = listWorkflows.execute()
+            val page = if (request.page > 0) request.page else 1
+            val size = if (request.size > 0) request.size else 50
+            val all = listWorkflows.execute()
+            val workflows = all.drop((page - 1) * size).take(size)
             ListWorkflowsResponse.newBuilder()
                 .addAllWorkflows(workflows.map(GrpcWorkflowMapper::toProto))
-                .setTotal(workflows.size).build()
+                .setTotal(all.size).build()
         }
 
     override fun startInstance(request: StartInstanceRequest, responseObserver: StreamObserver<InstanceResponse>) =
@@ -52,27 +58,31 @@ class WorkflowServiceEndpoint(
                 variables = if (request.hasVariables()) GrpcWorkflowMapper.structToMap(request.variables) else emptyMap(),
                 startedBy = null
             ))
-            GrpcWorkflowMapper.toProtoInstance(instance)
+            GrpcWorkflowMapper.toProtoInstance(instance, resolveEngineType(instance.engineAdapterId))
         }
 
     override fun getInstance(request: GetInstanceRequest, responseObserver: StreamObserver<InstanceResponse>) =
         GrpcErrorMapper.handle(responseObserver) {
-            GrpcWorkflowMapper.toProtoInstance(getInstance.execute(InstanceId(UUID.fromString(request.instanceId))))
+            val instance = getInstance.execute(InstanceId(UUID.fromString(request.instanceId)))
+            GrpcWorkflowMapper.toProtoInstance(instance, resolveEngineType(instance.engineAdapterId))
         }
 
     override fun suspendInstance(request: SuspendInstanceRequest, responseObserver: StreamObserver<InstanceResponse>) =
         GrpcErrorMapper.handle(responseObserver) {
-            GrpcWorkflowMapper.toProtoInstance(suspendInstance.execute(InstanceId(UUID.fromString(request.instanceId))))
+            val instance = suspendInstance.execute(InstanceId(UUID.fromString(request.instanceId)))
+            GrpcWorkflowMapper.toProtoInstance(instance, resolveEngineType(instance.engineAdapterId))
         }
 
     override fun resumeInstance(request: ResumeInstanceRequest, responseObserver: StreamObserver<InstanceResponse>) =
         GrpcErrorMapper.handle(responseObserver) {
-            GrpcWorkflowMapper.toProtoInstance(resumeInstance.execute(InstanceId(UUID.fromString(request.instanceId))))
+            val instance = resumeInstance.execute(InstanceId(UUID.fromString(request.instanceId)))
+            GrpcWorkflowMapper.toProtoInstance(instance, resolveEngineType(instance.engineAdapterId))
         }
 
     override fun cancelInstance(request: CancelInstanceRequest, responseObserver: StreamObserver<InstanceResponse>) =
         GrpcErrorMapper.handle(responseObserver) {
-            GrpcWorkflowMapper.toProtoInstance(cancelInstance.execute(InstanceId(UUID.fromString(request.instanceId))))
+            val instance = cancelInstance.execute(InstanceId(UUID.fromString(request.instanceId)))
+            GrpcWorkflowMapper.toProtoInstance(instance, resolveEngineType(instance.engineAdapterId))
         }
 
     override fun getInstanceVariables(request: GetInstanceRequest, responseObserver: StreamObserver<InstanceVariablesResponse>) =
@@ -80,4 +90,9 @@ class WorkflowServiceEndpoint(
             val variables = getInstanceVariables.execute(InstanceId(UUID.fromString(request.instanceId)))
             GrpcWorkflowMapper.toProtoVariables(request.instanceId, variables)
         }
+
+    private fun resolveEngineType(adapterId: EngineAdapterId?): String =
+        adapterId
+            ?.let { adapterConfigRepository.findById(it)?.engineType?.name }
+            ?: ""
 }

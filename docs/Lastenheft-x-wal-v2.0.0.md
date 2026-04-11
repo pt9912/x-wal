@@ -9,7 +9,7 @@ Er ermöglicht engineübergreifende Migrationen, Analysen und Generierungen, um 
 
 ### API-Umsetzungsstand
 
-- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- REST: Kern-API vollständig dokumentiert und implementiert (18 Kern-Endpunkte).
 - gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
 - OpenAPI/Swagger: Spezifikation und UI sind noch offen und werden als Folgeaufgabe geführt.
 - Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
@@ -121,7 +121,7 @@ Das **Intermediate Workflow Model (IWM)** fungiert als kanonisches Domänenmodel
 Es stellt folgende Kernaufgaben bereit:
 
 * **Canonical Data Layer:** Gemeinsame Datengrundlage für Engine-Adapter, Migration-Layer und Analysefunktionen.  
-* **Schema-Governance:** Pflege und Versionierung des JSON-Schemas (`docs/iwm.schema.json`), inklusive Validierungsroutinen und Kompatibilitätscheck.  
+* **Schema-Governance:** Pflege und Versionierung des JSON-Schemas (`hexagon/core/src/main/resources/schema/iwm.schema.json` ), inklusive Validierungsroutinen und Kompatibilitätscheck.  
 * **Erweiterbarkeit:** Aufnahme von Enginespezifika über optionale Erweiterungsbereiche (z.B. BPMN-Lane-Assignments, Policies), ohne das generische Modell zu verletzen.  
 * **Analyse & Migration:** Grundlage für Migrationsreports, KI-gestützte Transformationen und automatisierte Findings (`analysis`-Sektion des Schemas).
 * **Extensions-Namespace:** Konfigurierbarer Container für proprietäre Metadaten (Workflow-/Task-/Edge-Ebene), der Migrationen ohne Informationsverlust ermöglicht.
@@ -141,7 +141,7 @@ Alle Adapter und Werkzeuge müssen das IWM als internen Austausch- und Persisten
 1.  **Akteur:** Mitarbeiter (Client-Anwendung)
 2.  **Szenario:** Ein Mitarbeiter stellt einen Urlaubsantrag über eine Web-Anwendung.
 3.  **Ablauf:**
-    * Die Client-Anwendung sendet eine `POST`-Anfrage an den `/workflows/start`-Endpunkt der x-wal API mit der Prozess-ID `urlaubsantrag` und den Prozessvariablen (Mitarbeiter-ID, Startdatum, Enddatum).
+    * Die Client-Anwendung sendet eine `POST`-Anfrage an den `/api/v1/workflows/{id}/start`-Endpunkt der x-wal API mit der Prozess-ID `urlaubsantrag` und den Prozessvariablen (Mitarbeiter-ID, Startdatum, Enddatum).
     * x-wal startet die Workflow-Instanz in der konfigurierten Engine (z.B. Flowable).
     * Ein User-Task "Antrag genehmigen" wird für den zuständigen Vorgesetzten erstellt.
     * Die Vorgesetzten-Anwendung fragt regelmäßig über den `/tasks`-Endpunkt die offenen Aufgaben ab und zeigt sie an.
@@ -154,7 +154,7 @@ Alle Adapter und Werkzeuge müssen das IWM als internen Austausch- und Persisten
 | Nr.  | Kategorie      | Beschreibung                                                                                                                                                                                  |
 | ---- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | M-01 | Funktional     | Einheitliches Workflow-API (Start, Stop, Query, Task-Management).                                                                                                                             |
-| M-02 | Funktional     | Engine-Adapter für Camunda (7.x und 8.x/Zeebe), Flowable, Activiti, Imixs.                                                                                                                    |
+| M-02 | Funktional     | Engine-Adapter für Camunda (Mind. 7.x) und Flowable; Erweiterbarkeit für weitere Engines (8.x/Zeebe, Activiti, Imixs) ist vorgesehen.                                                                                                                    |
 | M-03 | Funktional     | Automatische Auswahl der Engine anhand Konfiguration.                                                                                                                                         |
 | M-04 | Funktional     | Persistenz-Abstraktion für Workflow-Instanzen.                                                                                                                                                |
 | M-05 | Schnittstellen | Bereitstellung als REST-API (OpenAPI 3) und optional gRPC.                                                                                                                                    |

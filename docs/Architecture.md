@@ -6,7 +6,7 @@
 
 ### API-Umsetzungsstand
 
-- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- REST: Kern-API vollständig dokumentiert und implementiert (18 Kern-Endpunkte).
 - gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
 - OpenAPI/Swagger: Dokumentation noch als offener Punkt (noch nicht end-to-end produktiv geschaltet).
 - Security: aktuelle Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.

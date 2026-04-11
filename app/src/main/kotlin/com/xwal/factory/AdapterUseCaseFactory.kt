@@ -17,9 +17,10 @@ class AdapterUseCaseFactory {
     fun registerAdapterUseCase(
         adapterConfigRepository: EngineAdapterConfigRepository,
         adapterResolution: AdapterResolutionService,
+        adapterCache: AdapterInstanceCachePort,
         transactionPort: TransactionPort
     ): RegisterAdapterUseCase =
-        RegisterAdapterUseCaseImpl(adapterConfigRepository, adapterResolution, transactionPort)
+        RegisterAdapterUseCaseImpl(adapterConfigRepository, adapterResolution, adapterCache, transactionPort)
 
     @Singleton
     fun deregisterAdapterUseCase(

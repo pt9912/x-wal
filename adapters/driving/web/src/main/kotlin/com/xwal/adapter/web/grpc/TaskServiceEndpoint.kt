@@ -19,11 +19,17 @@ class TaskServiceEndpoint(
 
     override fun queryTasks(request: QueryTasksRequest, responseObserver: StreamObserver<QueryTasksResponse>) =
         GrpcErrorMapper.handle(responseObserver) {
+            val size = if (request.size > 0) request.size else 50
+            val page = if (request.page > 0) request.page else 1
             val filter = TaskFilter(
                 assignee = if (request.hasAssignee()) request.assignee else null,
-                status = if (request.hasStatus()) runCatching { TaskStatus.valueOf(request.status.uppercase()) }.getOrNull() else null,
-                limit = if (request.size > 0) request.size else 50,
-                offset = if (request.page > 0) (request.page - 1) * request.size else 0
+                processInstanceId = if (request.hasWorkflowId()) request.workflowId else null,
+                status = if (request.hasStatus()) runCatching { TaskStatus.valueOf(request.status.uppercase()) }
+                    .getOrElse {
+                        throw IllegalArgumentException("Invalid task status: ${request.status}. Valid values: ${TaskStatus.entries.joinToString()}")
+                    } else null,
+                limit = size,
+                offset = (page - 1) * size
             )
             val tasks = queryTasks.execute(filter)
             QueryTasksResponse.newBuilder()
