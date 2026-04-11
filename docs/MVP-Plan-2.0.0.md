@@ -24,7 +24,7 @@
 | **Persistenz** | Done | PostgreSQL 16, Flyway (3 Migrationen), 3 Repositories |
 | **Engine-Adapter** | Done | Camunda 7 + Flowable (REST), IWM-BPMN Transformation |
 | **Security** | Done | Keycloak OAuth2/JWT, Rollen-Mapping |
-| **Observability** | Basis | Tracer/Meter Beans bereit, Use-Case-Decorators offen |
+| **Observability** | Done | Tracer/Meter Beans bereit, Use-Case-Decorators vollständig über alle Use Cases verdrahtet |
 | **Migration CLI** | Done | Picocli, IWM<->BPMN bidirektional |
 | **DevOps** | Done | Dockerfile, docker-compose, DevContainer, 4 CI Workflows |
 | **Tests** | Done | 77 Tests (Domain, Use Case, Persistence, Engine, Architektur) |
@@ -41,7 +41,7 @@
 | **M-04** | Persistenz-Abstraktion | Done | PostgreSQL, Flyway, 3 Entities, 3 Repository-Adapter (hexagonal) |
 | **M-05** | REST-API (OpenAPI 3) + gRPC | Done | REST komplett, OpenAPI/Swagger konfiguriert, gRPC Endpoints (WorkflowServiceEndpoint, TaskServiceEndpoint) implementiert |
 | **M-06** | OAuth2/OpenID Connect (Keycloak) | Done | SecurityConfiguration, KeycloakRolesMapper, 4 Scopes |
-| **M-07** | OpenTelemetry Tracing/Logging | Basis | ObservabilityConfiguration (Tracer/Meter), JSON Logs, Use-Case-Decorators offen |
+| **M-07** | OpenTelemetry Tracing/Logging | Done | ObservabilityConfiguration (Tracer/Meter), JSON Logs, Use-Case-Decorators für alle 19 Use Cases aktiv |
 | **M-08** | Docker-Compose + DevContainer | Done | docker-compose.dev.yml, .devcontainer/, Dockerfile |
 | **M-09** | Test-Coverage 90%/80% | Teilweise | 77 Tests, Architektur-Tests, Coverage-Messung offen (JaCoCo) |
 | **M-10** | Linux/Container-Portabilitaet | Done | Multi-Stage Dockerfile, Alpine JRE, Health Check |
@@ -108,7 +108,7 @@ app/             Application.kt, 4 Factory-Klassen, Scheduler, application.yml
 ### Prioritaet 1 — Funktionale Luecken
 
 - [x] gRPC Endpoint-Implementierung (WorkflowServiceEndpoint, TaskServiceEndpoint)
-- [ ] Use-Case Observability-Decorators (Tracing/Metrics pro Use Case, aktuell teils implementiert)
+- [x] Use-Case Observability-Decorators (Tracing/Metrics pro Use Case)
 - [ ] JaCoCo Coverage Reports + Ziel 80%+ verifizieren
 - [ ] Connection Pooling fuer Engine REST Clients (HttpClientFactory)
 - [ ] Erweiterte Adapter-Endpunkte (GET /adapters, GET /adapters/enabled, GET /adapters/healthy) sind noch offen
@@ -149,7 +149,7 @@ app/             Application.kt, 4 Factory-Klassen, Scheduler, application.yml
 - [x] CI/CD Workflows (Build, Test, Docker, Docs)
 - [x] 77 Tests gruen
 - [x] gRPC Endpoints implementiert
-- [ ] Use-Case-Level Tracing/Metrics (teilweise: Write-Use-Cases instrumentiert, einzelne read-only Use-Cases noch ohne durchgängigen Wrapper)
+- [x] Use-Case-Level Tracing/Metrics (durchgängig)
 - [x] E2E Urlaubsantrag-Test: Camunda7 + Flowable
 - [ ] Test-Coverage >= 80%
 
