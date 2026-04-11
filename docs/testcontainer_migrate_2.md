@@ -83,7 +83,7 @@ Es wurde festgelegt, **keine hartkodierten Versionsangaben** in Modul-`build.gra
 
 ### Schritt 2: Versionskatalog auf 2.0.4 angehoben
 
-In [gradle/libs.versions.toml](/Development/x-wal/gradle/libs.versions.toml) die folgenden Änderungen durchgeführt:
+In [gradle/libs.versions.toml](../gradle/libs.versions.toml) die folgenden Änderungen durchgeführt:
 
 ```diff
 - testcontainers = "1.21.4"
