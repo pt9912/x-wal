@@ -1046,6 +1046,55 @@ micronaut {
 
 ---
 
+## Offene Punkte (Stand: 11. April 2026)
+
+Die folgenden 15 Dateien aus dem Migrationsplan wurden zurueckgestellt. Sie sind fuer die naechsten Sprints vorgesehen.
+
+### Prioritaet 1 — gRPC API (M-05)
+
+| Datei | Modul | Plan-Zeile | Beschreibung |
+|---|---|---|---|
+| `WorkflowServiceEndpoint.kt` | adapters/driving/web/grpc | 411 | 9 gRPC RPCs (CreateWorkflow, GetWorkflow, ListWorkflows, StartInstance, GetInstance, SuspendInstance, ResumeInstance, CancelInstance, GetInstanceVariables) |
+| `TaskServiceEndpoint.kt` | adapters/driving/web/grpc | 412 | 2 gRPC RPCs (QueryTasks, CompleteTask) |
+| `GrpcWorkflowMapper.kt` | adapters/driving/web/grpc/mapper | 414 | Proto-Messages <-> Domain-Modelle |
+| `GrpcTaskMapper.kt` | adapters/driving/web/grpc/mapper | 415 | Proto-Messages <-> Domain-Modelle |
+| `GrpcJwtAuthInterceptor.kt` | adapters/driven/identity | 544 | JWT-Authentifizierung fuer gRPC Calls |
+| `XwalGrpcConfiguration.kt` | app/config | 328 | gRPC Server Konfiguration |
+
+**Voraussetzung:** Protobuf-Gradle-Plugin muss in `adapters/driving/web/build.gradle.kts` konfiguriert werden (Code-Generierung aus `workflow.proto`).
+
+### Prioritaet 2 — Observability Decorators (M-07)
+
+| Datei | Modul | Plan-Zeile | Beschreibung |
+|---|---|---|---|
+| `TracedUseCaseDecorator.kt` | app/decorator | 324 | Generischer Tracing-Decorator — wrapping aller Use Cases mit OpenTelemetry Spans |
+| `MeteredUseCaseDecorator.kt` | app/decorator | 325 | Generischer Metrics-Decorator — Counter/Histogramme pro Use Case |
+| `AdapterMetrics.kt` | adapters/driven/observability | 554 | Engine-Adapter-spezifische Metriken (Call-Latenz, Erfolgsrate) |
+| `AdapterMetricsDecorator.kt` | adapters/driven/observability | 555 | Decorator: WorkflowEnginePort -> WorkflowEnginePort + Metriken |
+
+**Design-Entscheidung:** Decorators werden im `app`-Modul via `@Factory` gewired. Use Cases bleiben framework-frei. Siehe Design-Entscheidung #3.
+
+### Prioritaet 3 — Infrastruktur
+
+| Datei | Modul | Plan-Zeile | Beschreibung |
+|---|---|---|---|
+| `PostgresDistributedLockAdapter.kt` | adapters/driven/persistence/lock | 461 | Implementiert `DistributedLockPort` via PostgreSQL Advisory Locks. Benoetigt fuer Multi-Replica `SyncInstanceState`. |
+| `InstanceSyncConfig.kt` | app/config | 327 | `@ConfigurationProperties` fuer `xwal.instance-sync.*` (batch-size, timeout, retry). Aktuell via `@Value` Interpolation. |
+| `HttpClientFactory.kt` | adapters/driven/engine/config | 508 | Connection Pooling fuer Engine REST Clients. Aktuell: `HttpClient.create()` ohne Pool. |
+| `HttpClientPoolConfig.kt` | adapters/driven/engine/config | 509 | Pool-Konfiguration (max-connections, timeouts, TTL). |
+| `DeadLetterQueue.kt` | adapters/driven/engine/resilience | 513 | Speichert fehlgeschlagene Operationen fuer spaetere Wiederholung. Aktuell: Fehler werden nur geloggt. |
+
+### Zusammenfassung
+
+| Prioritaet | Dateien | Abhaengigkeit |
+|---|---|---|
+| 1 — gRPC | 6 | Protobuf-Codegen konfigurieren |
+| 2 — Observability | 4 | Tracer/Meter Beans vorhanden |
+| 3 — Infrastruktur | 5 | Unabhaengig voneinander |
+| **Gesamt** | **15** | |
+
+---
+
 ## Verifikation
 
 Nach Abschluss muessen folgende Kriterien erfuellt sein:
