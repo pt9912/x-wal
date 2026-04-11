@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/struct.proto";
+
 option java_multiple_files = true;
 option java_package = "com.xwal.adapter.web.grpc.proto";
 option java_outer_classname = "WorkflowProto";
@@ -28,14 +30,14 @@ message GetWorkflowRequest { string id = 1; }
 message ListWorkflowsRequest { int32 page = 1; int32 size = 2; }
 message ListWorkflowsResponse { repeated WorkflowResponse workflows = 1; int32 total = 2; }
 message WorkflowResponse { string id = 1; string name = 2; string version = 3; string iwm_definition = 4; string status = 5; int64 created_at = 6; int64 updated_at = 7; }
-message StartInstanceRequest { string workflow_id = 1; map<string, string> variables = 2; }
+message StartInstanceRequest { string workflow_id = 1; google.protobuf.Struct variables = 2; }
 message GetInstanceRequest { string instance_id = 1; }
 message SuspendInstanceRequest { string instance_id = 1; }
 message ResumeInstanceRequest { string instance_id = 1; }
 message CancelInstanceRequest { string instance_id = 1; }
 message InstanceResponse { string id = 1; string workflow_id = 2; string engine_type = 3; string engine_instance_id = 4; string status = 5; int64 started_at = 6; int64 completed_at = 7; }
-message InstanceVariablesResponse { string instance_id = 1; map<string, string> variables = 2; }
+message InstanceVariablesResponse { string instance_id = 1; google.protobuf.Struct variables = 2; }
 message QueryTasksRequest { optional string assignee = 1; optional string status = 2; optional string workflow_id = 3; int32 page = 4; int32 size = 5; }
 message QueryTasksResponse { repeated TaskResponse tasks = 1; int32 total = 2; }
-message CompleteTaskRequest { string task_id = 1; map<string, string> variables = 2; }
+message CompleteTaskRequest { string task_id = 1; google.protobuf.Struct variables = 2; }
 message TaskResponse { string id = 1; string name = 2; string assignee = 3; string status = 4; int64 created_at = 5; }

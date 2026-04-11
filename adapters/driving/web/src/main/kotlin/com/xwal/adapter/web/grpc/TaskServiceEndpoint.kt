@@ -1,6 +1,7 @@
 package com.xwal.adapter.web.grpc
 
 import com.xwal.adapter.web.grpc.mapper.GrpcTaskMapper
+import com.xwal.adapter.web.grpc.mapper.GrpcWorkflowMapper
 import com.xwal.adapter.web.grpc.proto.*
 import com.xwal.domain.model.TaskFilter
 import com.xwal.domain.model.TaskId
@@ -33,7 +34,8 @@ class TaskServiceEndpoint(
     override fun completeTask(request: com.xwal.adapter.web.grpc.proto.CompleteTaskRequest, responseObserver: StreamObserver<com.xwal.adapter.web.grpc.proto.TaskResponse>) =
         GrpcErrorMapper.handle(responseObserver) {
             val taskId = TaskId(request.taskId)
-            completeTask.execute(CompleteTaskUseCase.Command(taskId, request.variablesMap.toMap()))
+            val vars = if (request.hasVariables()) GrpcWorkflowMapper.structToMap(request.variables) else emptyMap()
+            completeTask.execute(CompleteTaskUseCase.Command(taskId, vars))
             com.xwal.adapter.web.grpc.proto.TaskResponse.newBuilder()
                 .setId(request.taskId).setStatus("COMPLETED").build()
         }

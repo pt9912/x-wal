@@ -48,7 +48,9 @@ class WorkflowServiceEndpoint(
         GrpcErrorMapper.handle(responseObserver) {
             val instance = startWorkflow.execute(StartWorkflowUseCase.Command(
                 workflowId = WorkflowId(UUID.fromString(request.workflowId)),
-                businessKey = null, variables = request.variablesMap.toMap(), startedBy = null
+                businessKey = null,
+                variables = if (request.hasVariables()) GrpcWorkflowMapper.structToMap(request.variables) else emptyMap(),
+                startedBy = null
             ))
             GrpcWorkflowMapper.toProtoInstance(instance)
         }
