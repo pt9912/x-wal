@@ -108,7 +108,7 @@ Hexagonale Architektur (Ports & Adapters) mit 10 Gradle-Modulen. Details: [Archi
 | **M-04** | Done | PostgreSQL 16, Flyway (3 Migrationen), 3 Repository-Adapter (WorkflowRepositoryAdapter, InstanceRepositoryAdapter, AdapterConfigRepositoryAdapter). Entity-Mapper trennen Domain von Persistenz. TransactionPort. | 5 Persistence-Integration-Tests (Testcontainers) |
 | **M-05** | Done | REST: 18 Endpoints mit OpenAPI-Annotationen. OpenAPI/Swagger konfiguriert. gRPC: workflow.proto + vollständige Endpoint-Implementierung (`WorkflowServiceEndpoint`, `TaskServiceEndpoint`). | OpenAPI/Swagger-Config + kompilierte gRPC-Endpunkte |
 | **M-06** | Done | SecurityConfiguration (JWT Issuer-Validation), KeycloakRolesMapper (Realm/Client-Rollen → 4 Scopes). @Secured auf allen Endpoints. | Keycloak Realm-Config |
-| **M-07** | Done | ObservabilityConfiguration (Tracer/Meter Beans), JSON Structured Logging (Logback + Logstash Encoder), Use-Case-Decorators für alle 19 Use Cases aktiv. | 19 Use Cases mit Tracing/Metrics verdrahtet |
+| **M-07** | Teilweise | ObservabilityConfiguration (Tracer/Meter Beans), JSON Structured Logging (Logback + Logstash Encoder), Use-Case-Decorators für alle 19 Use Cases aktiv. | 19 Use Cases mit Tracing/Metrics verdrahtet; produktive OTLP-/Metrics-Export-Pipeline zur Verifikation offen |
 | **M-08** | Done | docker-compose.dev.yml (6 Services), .devcontainer/ (JDK 21 + Kotlin CLI), Dockerfile (Multi-Stage, Alpine). | Dateien vorhanden |
 | **M-09** | Teilweise | 77 Tests (Domain 38, Use Case 14, Persistence 5, Engine 7, Architektur 13). JaCoCo-Reports und Coverage-Verifikation per Gradle-Konfiguration vorhanden; Ziel 80% ist noch explizit zu verifizieren. | `./gradlew test` gruen |
 | **M-10** | Done | Multi-Stage Dockerfile, eclipse-temurin:21-jre-alpine, Health Check. | Dockerfile vorhanden |
@@ -272,7 +272,7 @@ Siehe `.env.example`.
 | Prioritaet | Punkt | Geplant | Status |
 |---|---|---|---|
 | 1 | gRPC Endpoint-Implementierung | Erledigt | Done |
-| 1 | Use-Case Observability-Decorators | Erledigt | Done |
+| 1 | Use-Case Observability-Decorators | Erledigt | Teilweise (Use-Case-Instrumentierung; Umgebungspipeline verifizieren) |
 | 1 | DistributedLockPort Implementierung | Naechster Sprint | Offen |
 | 1 | JaCoCo Coverage-Ziel 80%+ | Naechster Sprint | Offen |
 | 2 | Zeebe/Camunda 8 Adapter (S-03) | Sprint danach | Offen |

@@ -24,7 +24,7 @@
 | **Persistenz** | Done | PostgreSQL 16, Flyway (3 Migrationen), 3 Repositories |
 | **Engine-Adapter** | Done | Camunda 7 + Flowable (REST), IWM-BPMN Transformation |
 | **Security** | Done | Keycloak OAuth2/JWT, Rollen-Mapping |
-| **Observability** | Done | Tracer/Meter Beans bereit, Use-Case-Decorators vollständig über alle Use Cases verdrahtet |
+| **Observability** | Teilweise | Tracer/Meter Beans und Use-Case-Decorators aktiv; Export-Pipeline in Umgebung (Collector/Endpoint) noch verifizieren |
 | **Migration CLI** | Done | Picocli, IWM<->BPMN bidirektional |
 | **DevOps** | Done | Dockerfile, docker-compose, DevContainer, 4 CI Workflows |
 | **Tests** | Done | 77 Tests (Domain, Use Case, Persistence, Engine, Architektur) |
@@ -41,7 +41,7 @@
 | **M-04** | Persistenz-Abstraktion | Done | PostgreSQL, Flyway, 3 Entities, 3 Repository-Adapter (hexagonal) |
 | **M-05** | REST-API (OpenAPI 3) + gRPC | Done | REST komplett, OpenAPI/Swagger konfiguriert, gRPC Endpoints (WorkflowServiceEndpoint, TaskServiceEndpoint) implementiert |
 | **M-06** | OAuth2/OpenID Connect (Keycloak) | Done | SecurityConfiguration, KeycloakRolesMapper, 4 Scopes |
-| **M-07** | OpenTelemetry Tracing/Logging | Done | ObservabilityConfiguration (Tracer/Meter), JSON Logs, Use-Case-Decorators für alle 19 Use Cases aktiv |
+| **M-07** | OpenTelemetry Tracing/Logging | Teilweise | ObservabilityConfiguration (Tracer/Meter), JSON Logs, Use-Case-Decorators für alle 19 Use Cases aktiv. End-to-End-Export in Zielumgebung verifizieren |
 | **M-08** | Docker-Compose + DevContainer | Done | docker-compose.dev.yml, .devcontainer/, Dockerfile |
 | **M-09** | Test-Coverage 90%/80% | Teilweise | 77 Tests, Architektur-Tests, Coverage-Messung offen (JaCoCo) |
 | **M-10** | Linux/Container-Portabilitaet | Done | Multi-Stage Dockerfile, Alpine JRE, Health Check |
