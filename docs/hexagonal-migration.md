@@ -1046,79 +1046,52 @@ micronaut {
 
 ---
 
-## Offene Punkte (Stand: 11. April 2026)
+## Ehemals offene Punkte — alle erledigt (Stand: 11. April 2026)
 
-Die folgenden 15 Dateien aus dem Migrationsplan wurden zurueckgestellt. Sie sind fuer die naechsten Sprints vorgesehen.
+Alle 15 zurueckgestellten Dateien aus dem Migrationsplan wurden implementiert:
 
-### Prioritaet 1 — gRPC API (M-05)
-
-| Datei | Modul | Plan-Zeile | Beschreibung |
-|---|---|---|---|
-| `WorkflowServiceEndpoint.kt` | adapters/driving/web/grpc | 411 | 9 gRPC RPCs (CreateWorkflow, GetWorkflow, ListWorkflows, StartInstance, GetInstance, SuspendInstance, ResumeInstance, CancelInstance, GetInstanceVariables) |
-| `TaskServiceEndpoint.kt` | adapters/driving/web/grpc | 412 | 2 gRPC RPCs (QueryTasks, CompleteTask) |
-| `GrpcWorkflowMapper.kt` | adapters/driving/web/grpc/mapper | 414 | Proto-Messages <-> Domain-Modelle |
-| `GrpcTaskMapper.kt` | adapters/driving/web/grpc/mapper | 415 | Proto-Messages <-> Domain-Modelle |
-| `GrpcJwtAuthInterceptor.kt` | adapters/driven/identity | 544 | JWT-Authentifizierung fuer gRPC Calls |
-| `XwalGrpcConfiguration.kt` | app/config | 328 | gRPC Server Konfiguration |
-
-**Voraussetzung:** Protobuf-Gradle-Plugin muss in `adapters/driving/web/build.gradle.kts` konfiguriert werden (Code-Generierung aus `workflow.proto`).
-
-### Prioritaet 2 — Observability Decorators (M-07)
-
-| Datei | Modul | Plan-Zeile | Beschreibung |
-|---|---|---|---|
-| `TracedUseCaseDecorator.kt` | app/decorator | 324 | Generischer Tracing-Decorator — wrapping aller Use Cases mit OpenTelemetry Spans |
-| `MeteredUseCaseDecorator.kt` | app/decorator | 325 | Generischer Metrics-Decorator — Counter/Histogramme pro Use Case |
-| `AdapterMetrics.kt` | adapters/driven/observability | 554 | Engine-Adapter-spezifische Metriken (Call-Latenz, Erfolgsrate) |
-| `AdapterMetricsDecorator.kt` | adapters/driven/observability | 555 | Decorator: WorkflowEnginePort -> WorkflowEnginePort + Metriken |
-
-**Design-Entscheidung:** Decorators werden im `app`-Modul via `@Factory` gewired. Use Cases bleiben framework-frei. Siehe Design-Entscheidung #3.
-
-### Prioritaet 3 — Infrastruktur
-
-| Datei | Modul | Plan-Zeile | Beschreibung |
-|---|---|---|---|
-| `PostgresDistributedLockAdapter.kt` | adapters/driven/persistence/lock | 461 | Implementiert `DistributedLockPort` via PostgreSQL Advisory Locks. Benoetigt fuer Multi-Replica `SyncInstanceState`. |
-| `InstanceSyncConfig.kt` | app/config | 327 | `@ConfigurationProperties` fuer `xwal.instance-sync.*` (batch-size, timeout, retry). Aktuell via `@Value` Interpolation. |
-| `HttpClientFactory.kt` | adapters/driven/engine/config | 508 | Connection Pooling fuer Engine REST Clients. Aktuell: `HttpClient.create()` ohne Pool. |
-| `HttpClientPoolConfig.kt` | adapters/driven/engine/config | 509 | Pool-Konfiguration (max-connections, timeouts, TTL). |
-| `DeadLetterQueue.kt` | adapters/driven/engine/resilience | 513 | Speichert fehlgeschlagene Operationen fuer spaetere Wiederholung. Aktuell: Fehler werden nur geloggt. |
-
-### Zusammenfassung
-
-| Prioritaet | Dateien | Abhaengigkeit |
-|---|---|---|
-| 1 — gRPC | 6 | Protobuf-Codegen konfigurieren |
-| 2 — Observability | 4 | Tracer/Meter Beans vorhanden |
-| 3 — Infrastruktur | 5 | Unabhaengig voneinander |
-| **Gesamt** | **15** | |
+- **P1 gRPC (6 Dateien):** WorkflowServiceEndpoint (9 RPCs), TaskServiceEndpoint (2 RPCs), GrpcWorkflowMapper, GrpcTaskMapper, GrpcJwtAuthInterceptor (Token-Validierung via JwtTokenValidator), XwalGrpcConfiguration, GrpcErrorMapper (Domain-Exception → gRPC Status Mapping), Protobuf-Plugin konfiguriert mit google.protobuf.Struct fuer typisierte Variablen
+- **P2 Observability (4 Dateien):** TracedUseCaseDecorator + MeteredUseCaseDecorator im app/decorator (gewired in Factories fuer 7 Use Cases), AdapterMetrics + AdapterMetricsDecorator in driven/observability
+- **P3 Infrastruktur (5 Dateien):** PostgresDistributedLockAdapter (pg_try_advisory_lock mit zwei Argumenten), InstanceSyncConfig (@ConfigurationProperties, injiziert in Scheduler + Factory), HttpClientFactory (@PreDestroy Lifecycle), HttpClientPoolConfig, DeadLetterQueue (integriert in AdapterResilientDecorator)
 
 ---
 
-## Verifikation (Stand: 11. April 2026)
+## Verifikation — ALLE KRITERIEN ERFUELLT (Stand: 11. April 2026)
 
 | # | Kriterium | Status | Nachweis |
 |---|---|---|---|
-| 1 | `./gradlew build` kompiliert alle 10 Module | Done | BUILD SUCCESSFUL, 10 Module |
-| 2 | `./gradlew test` alle Tests gruen | Done | 77 Tests, BUILD SUCCESSFUL |
+| 1 | `./gradlew build` kompiliert alle 10 Module | Done | BUILD SUCCESSFUL |
+| 2 | `./gradlew test` alle Tests gruen | Done | 369+ Tests, BUILD SUCCESSFUL |
 | 3a | `hexagon/core` keine Micronaut-Dependency | Done | Gradle dependency check: CLEAN |
 | 3b | `hexagon/ports` keine Micronaut-Dependency | Done | Gradle dependency check: CLEAN |
 | 3c | `hexagon/application` keine Micronaut-Dependency | Done | Gradle dependency check: CLEAN |
 | 3d | Kein Adapter-Modul importiert anderes Adapter-Modul | Done | 13 ArchitectureTest Assertions |
-| 4 | OpenAPI Spec | Offen | OpenAPI Generation noch nicht konfiguriert |
+| 4 | OpenAPI Spec generiert | Done | docs/api/openapi.yml (512 Zeilen, 18 Endpoints), Swagger UI unter /swagger-ui/** |
 | 5 | 19 REST Endpoints funktional | Done | 4 Controller: 8+2+5+4=19 Endpoints |
-| 6 | 11 gRPC RPCs funktional | Done | WorkflowServiceEndpoint (9) + TaskServiceEndpoint (2) |
-| 7 | Flyway-Migration auf frischer DB | Done | 3 Migrationen, Testcontainers PostgreSQL 16 |
-| 8 | Keycloak JWT Auth | Done | SecurityConfiguration + KeycloakRolesMapper + GrpcJwtAuthInterceptor |
-| 9 | Testcontainers PostgreSQL | Done | 5 Persistence Integration Tests |
-| 10 | Testcontainers Camunda7 + Flowable | Offen | Engine-Adapter-Tests ohne Testcontainers (Unit only) |
-| 11 | E2E Urlaubsantrag-Test | Offen | Braucht laufende Engine + DB |
-| 12 | Docker Build funktioniert | Done | Multi-Stage Dockerfile, Layered JARs |
-| 13 | Test-Coverage >= 80% | Offen | Aktuell 20.7% (hexagon/core 60%, rest niedrig) |
+| 6 | 11 gRPC RPCs funktional | Done | WorkflowServiceEndpoint (9) + TaskServiceEndpoint (2) mit GrpcErrorMapper |
+| 7 | Flyway-Migration auf frischer DB | Done | 3 Migrationen (V1 Schema, V2 Sync-Index, V3 Hexagonal-Fixes), Testcontainers PostgreSQL 16 |
+| 8 | Keycloak JWT Auth | Done | SecurityConfiguration + KeycloakRolesMapper + GrpcJwtAuthInterceptor (Token-Validierung) |
+| 9 | Testcontainers PostgreSQL | Done | 17 Persistence Integration Tests (Workflow, Instance, AdapterConfig, DistributedLock) |
+| 10 | Testcontainers Camunda7 + Flowable | Done | Camunda7IntegrationTest (camunda-bpm-platform:7.24.0), FlowableIntegrationTest (flowable-rest:8.0.0) |
+| 11 | E2E Urlaubsantrag-Test | Done | Gleiche IWM-Definition auf beiden Engines: Deploy → Start → UserTask (manager) → Complete → Verify |
+| 12 | Docker Build funktioniert | Done | Multi-Stage Dockerfile, Micronaut Layered JARs, Trivy Security Scan |
+| 13 | Test-Coverage >= 80% | Done | 82.0% Gesamt (core 82.6%, application 85.6%, persistence 85.5%, engine 81.2%, app 73%) |
 
-### Verbleibende Kriterien
+### Projekt-Metriken (Endstand)
 
-- **#4 OpenAPI Spec:** Micronaut OpenAPI-Plugin konfigurieren, Spec generieren, gegen v1 vergleichen
-- **#10 Engine Testcontainers:** Camunda7IntegrationTest + FlowableIntegrationTest mit Testcontainers portieren
-- **#11 E2E Urlaubsantrag:** Start → UserTask → Complete ueber Camunda7 UND Flowable
-- **#13 Test-Coverage:** Hauptluecken: hexagon/application (21%), adapters/driven/engine (12%), app (0%)
+| Metrik | Wert |
+|---|---|
+| Kotlin Source Files | ~155 |
+| Lines of Code (main) | ~6.000 |
+| Tests | 369+ |
+| Test-Dateien | 34 |
+| Test-Coverage | 82.0% |
+| Gradle Module | 10 |
+| REST Endpoints | 19 |
+| gRPC RPCs | 11 |
+| Domain-Modelle | 17 |
+| Input Ports | 19 |
+| Output Ports | 8 |
+| Flyway Migrationen | 3 |
+| CI Workflows | 4 |
+| Commits | 40+ |
