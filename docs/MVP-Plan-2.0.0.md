@@ -171,6 +171,6 @@ app/             Application.kt, 4 Factory-Klassen, Scheduler, application.yml
 | Flowable | 7.0.0 |
 | Resilience4j | 2.1.0 |
 | OpenTelemetry | 1.32.0 |
-| Testcontainers | 1.21.4 |
+| Testcontainers | 2.0.4 |
 | KSP | 2.3.6 |
 | Picocli | 4.7.5 |
