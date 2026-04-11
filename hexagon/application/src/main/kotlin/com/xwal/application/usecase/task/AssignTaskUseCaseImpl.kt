@@ -9,7 +9,7 @@ class AssignTaskUseCaseImpl(
 ) : AssignTaskUseCase {
 
     override fun execute(taskId: TaskId, assignee: String) {
-        val adapter = adapterResolution.resolveByEngineType(taskId.engineType)
+        val adapter = adapterResolution.resolveForTask(taskId)
         adapter.assignTask(taskId.engineTaskId, assignee)
     }
 }

@@ -9,7 +9,7 @@ class CompleteTaskUseCaseImpl(
 ) : CompleteTaskUseCase {
 
     override fun execute(command: Command) {
-        val adapter = adapterResolution.resolveByEngineType(command.taskId.engineType)
+        val adapter = adapterResolution.resolveForTask(command.taskId)
         adapter.completeTask(command.taskId.engineTaskId, command.variables)
     }
 }

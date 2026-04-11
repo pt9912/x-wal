@@ -77,7 +77,7 @@ class FlowableRestClient(
     fun suspendProcessInstance(instanceId: String) {
         val body = """{"action":"suspend"}"""
         val request = applyAuth(
-            HttpRequest.PUT("$baseUrl/runtime/process-instances/$instanceId", body)
+            HttpRequest.PUT("$baseUrl/runtime/process-instances/${encodePathSegment(instanceId)}", body)
                 .contentType(MediaType.APPLICATION_JSON_TYPE)
         )
         executeRequest(request, "suspend") { }
@@ -86,7 +86,7 @@ class FlowableRestClient(
     fun activateProcessInstance(instanceId: String) {
         val body = """{"action":"activate"}"""
         val request = applyAuth(
-            HttpRequest.PUT("$baseUrl/runtime/process-instances/$instanceId", body)
+            HttpRequest.PUT("$baseUrl/runtime/process-instances/${encodePathSegment(instanceId)}", body)
                 .contentType(MediaType.APPLICATION_JSON_TYPE)
         )
         executeRequest(request, "activate") { }
@@ -94,12 +94,12 @@ class FlowableRestClient(
 
     fun deleteProcessInstance(instanceId: String, reason: String?) {
         val encoded = reason?.let { "?deleteReason=${URLEncoder.encode(it, Charsets.UTF_8)}" } ?: ""
-        val request = applyAuth(HttpRequest.DELETE<String>("$baseUrl/runtime/process-instances/$instanceId$encoded"))
+        val request = applyAuth(HttpRequest.DELETE<String>("$baseUrl/runtime/process-instances/${encodePathSegment(instanceId)}$encoded"))
         executeRequest(request, "delete") { }
     }
 
     fun getProcessInstanceVariables(instanceId: String): Map<String, Any> {
-        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/runtime/process-instances/$instanceId/variables"))
+        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/runtime/process-instances/${encodePathSegment(instanceId)}/variables"))
         return executeRequest(request, "getVariables") { response ->
             val json = objectMapper.readTree(response.body() as String)
             convertFlowableVariablesToMap(json)
@@ -109,7 +109,7 @@ class FlowableRestClient(
     // ========== Tasks ==========
 
     fun getTask(taskId: String): JsonNode {
-        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/runtime/tasks/$taskId"))
+        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/runtime/tasks/${encodePathSegment(taskId)}"))
         return executeRequest(request, "getTask") { response ->
             objectMapper.readTree(response.body() as String)
         }
@@ -118,9 +118,9 @@ class FlowableRestClient(
     fun queryTasks(assignee: String?, candidateGroup: String?, processInstanceId: String?): JsonNode {
         val params = buildString {
             val parts = mutableListOf<String>()
-            assignee?.let { parts.add("assignee=$it") }
-            candidateGroup?.let { parts.add("candidateGroup=$it") }
-            processInstanceId?.let { parts.add("processInstanceId=$it") }
+            assignee?.let { parts.add("assignee=${URLEncoder.encode(it, Charsets.UTF_8)}") }
+            candidateGroup?.let { parts.add("candidateGroup=${URLEncoder.encode(it, Charsets.UTF_8)}") }
+            processInstanceId?.let { parts.add("processInstanceId=${URLEncoder.encode(it, Charsets.UTF_8)}") }
             if (parts.isNotEmpty()) append("?${parts.joinToString("&")}")
         }
         val request = applyAuth(HttpRequest.GET<String>("$baseUrl/runtime/tasks$params"))
@@ -136,7 +136,7 @@ class FlowableRestClient(
             set<ArrayNode>("variables", convertToFlowableFormat(variables))
         }
         val request = applyAuth(
-            HttpRequest.POST("$baseUrl/runtime/tasks/$taskId", body.toString())
+            HttpRequest.POST("$baseUrl/runtime/tasks/${encodePathSegment(taskId)}", body.toString())
                 .contentType(MediaType.APPLICATION_JSON_TYPE)
         )
         executeRequest(request, "completeTask") { }
@@ -145,7 +145,7 @@ class FlowableRestClient(
     fun assignTask(taskId: String, assignee: String) {
         val body = objectMapper.createObjectNode().apply { put("assignee", assignee) }.toString()
         val request = applyAuth(
-            HttpRequest.PUT("$baseUrl/runtime/tasks/$taskId", body)
+            HttpRequest.PUT("$baseUrl/runtime/tasks/${encodePathSegment(taskId)}", body)
                 .contentType(MediaType.APPLICATION_JSON_TYPE)
         )
         executeRequest(request, "assignTask") { }
@@ -154,7 +154,7 @@ class FlowableRestClient(
     // ========== Process Definition ==========
 
     fun getProcessDefinitionXml(processDefinitionId: String): String {
-        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/repository/process-definitions/$processDefinitionId/resourcedata"))
+        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/repository/process-definitions/${encodePathSegment(processDefinitionId)}/resourcedata"))
         return executeRequest(request, "getDefinitionXml") { response ->
             response.body() as String
         }
@@ -163,14 +163,16 @@ class FlowableRestClient(
     // ========== History ==========
 
     fun getHistoricProcessInstance(processInstanceId: String): JsonNode {
-        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/history/historic-process-instances/$processInstanceId"))
+        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/history/historic-process-instances/${encodePathSegment(processInstanceId)}"))
         return executeRequest(request, "getHistoric") { response ->
             objectMapper.readTree(response.body() as String)
         }
     }
 
     fun getExecutions(processInstanceId: String): JsonNode {
-        val request = applyAuth(HttpRequest.GET<String>("$baseUrl/runtime/executions?processInstanceId=$processInstanceId"))
+        val request = applyAuth(
+            HttpRequest.GET<String>("$baseUrl/runtime/executions?processInstanceId=${URLEncoder.encode(processInstanceId, Charsets.UTF_8)}")
+        )
         return executeRequest(request, "getExecutions") { response ->
             val json = objectMapper.readTree(response.body() as String)
             json.get("data") ?: objectMapper.createArrayNode()
@@ -249,6 +251,8 @@ class FlowableRestClient(
         }
         return result
     }
+
+    private fun encodePathSegment(value: String): String = URLEncoder.encode(value, Charsets.UTF_8).replace("+", "%20")
 
     private data class CredentialsAndUrl(val cleanedBaseUrl: String, val username: String?, val password: String?)
 

@@ -2,6 +2,7 @@ package com.xwal.domain.model
 
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
@@ -31,6 +32,25 @@ class DomainModelTest {
         assertEquals("CAMUNDA7:task-123", taskId.value)
         assertEquals(EngineType.CAMUNDA7, taskId.engineType)
         assertEquals("task-123", taskId.engineTaskId)
+    }
+
+    @Test
+    fun `TaskId supports adapter-scoped format`() {
+        val adapterId = EngineAdapterId(UUID.fromString("11111111-1111-1111-1111-111111111111"))
+        val taskId = TaskId.of(EngineType.CAMUNDA7, adapterId, "task-123")
+
+        assertEquals("CAMUNDA7:${adapterId.value}:task-123", taskId.value)
+        assertEquals(EngineType.CAMUNDA7, taskId.engineType)
+        assertEquals(adapterId, taskId.adapterId)
+        assertEquals("task-123", taskId.engineTaskId)
+    }
+
+    @Test
+    fun `TaskId accepts legacy task id with colon`() {
+        val taskId = TaskId("CAMUNDA7:tenant:abc:123")
+        assertEquals(EngineType.CAMUNDA7, taskId.engineType)
+        assertEquals(null, taskId.adapterId)
+        assertEquals("tenant:abc:123", taskId.engineTaskId)
     }
 
     @Test

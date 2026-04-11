@@ -37,7 +37,7 @@ class QueryTasksUseCaseImpl(
                     offset = 0
                 )
                 val tasks = adapter.queryTasks(engineFilter).map { task ->
-                    task.copy(taskId = TaskId.of(adapterConfig.engineType, task.taskId.engineTaskId))
+                    task.copy(taskId = TaskId.of(adapterConfig.engineType, adapterConfig.id, task.taskId.engineTaskId))
                 }
                 allTasks.addAll(tasks)
             } catch (e: Exception) {

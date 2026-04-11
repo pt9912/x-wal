@@ -10,7 +10,7 @@ class GetTaskUseCaseImpl(
 ) : GetTaskUseCase {
 
     override fun execute(taskId: TaskId): Task {
-        val adapter = adapterResolution.resolveByEngineType(taskId.engineType)
+        val adapter = adapterResolution.resolveForTask(taskId)
         val task = adapter.getTask(taskId.engineTaskId)
         return task.copy(taskId = taskId)
     }

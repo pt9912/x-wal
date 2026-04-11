@@ -5,6 +5,7 @@ import com.xwal.domain.exception.AdapterOperationException
 import com.xwal.domain.model.EngineAdapterConfig
 import com.xwal.domain.model.EngineAdapterId
 import com.xwal.domain.model.EngineType
+import com.xwal.domain.model.TaskId
 import com.xwal.domain.model.WorkflowInstance
 import com.xwal.domain.port.output.AdapterInstanceCachePort
 import com.xwal.domain.port.output.EngineAdapterConfigRepository
@@ -57,10 +58,15 @@ class AdapterResolutionService(
 
     /** Find first enabled adapter for an engine type. */
     fun resolveByEngineType(engineType: EngineType): WorkflowEnginePort {
-        val configs = adapterConfigRepository.findByEngineType(engineType).filter { it.enabled }
-        val config = configs.firstOrNull()
+        val config = adapterConfigRepository.findByEngineType(engineType)
+            .filter { it.enabled }
+            .minWithOrNull(compareBy({ it.priority }, { it.id.value }))
             ?: throw AdapterNotFoundException("No enabled adapter for engine type: ${engineType.name}")
         return resolveByConfig(config)
+    }
+
+    fun resolveForTask(taskId: TaskId): WorkflowEnginePort {
+        return taskId.adapterId?.let { resolveById(it) } ?: resolveByEngineType(taskId.engineType)
     }
 
     private fun createAndCache(config: EngineAdapterConfig): WorkflowEnginePort {

@@ -49,7 +49,7 @@ class Camunda7RestClient(
             set<ObjectNode>("variables", convertToVariableMap(variables))
         }
 
-        val request = HttpRequest.POST("$baseUrl/process-definition/key/$processDefinitionKey/start", body.toString())
+        val request = HttpRequest.POST("$baseUrl/process-definition/key/${encodePathSegment(processDefinitionKey)}/start", body.toString())
             .contentType(MediaType.APPLICATION_JSON_TYPE)
 
         return executeRequest(request, "startInstance") { response ->
@@ -59,14 +59,14 @@ class Camunda7RestClient(
     }
 
     fun getProcessInstance(instanceId: String): JsonNode {
-        val request = HttpRequest.GET<String>("$baseUrl/process-instance/$instanceId")
+        val request = HttpRequest.GET<String>("$baseUrl/process-instance/${encodePathSegment(instanceId)}")
         return executeRequest(request, "getInstance") { response ->
             objectMapper.readTree(response.body() as String)
         }
     }
 
     fun getProcessInstanceVariables(instanceId: String): Map<String, Any> {
-        val request = HttpRequest.GET<String>("$baseUrl/process-instance/$instanceId/variables")
+        val request = HttpRequest.GET<String>("$baseUrl/process-instance/${encodePathSegment(instanceId)}/variables")
         return executeRequest(request, "getVariables") { response ->
             val json = objectMapper.readTree(response.body() as String)
             convertFromVariableMap(json)
@@ -75,14 +75,14 @@ class Camunda7RestClient(
 
     fun suspendProcessInstance(instanceId: String) {
         val body = """{"suspended": true}"""
-        val request = HttpRequest.PUT("$baseUrl/process-instance/$instanceId/suspended", body)
+        val request = HttpRequest.PUT("$baseUrl/process-instance/${encodePathSegment(instanceId)}/suspended", body)
             .contentType(MediaType.APPLICATION_JSON_TYPE)
         executeRequest(request, "suspend") { }
     }
 
     fun activateProcessInstance(instanceId: String) {
         val body = """{"suspended": false}"""
-        val request = HttpRequest.PUT("$baseUrl/process-instance/$instanceId/suspended", body)
+        val request = HttpRequest.PUT("$baseUrl/process-instance/${encodePathSegment(instanceId)}/suspended", body)
             .contentType(MediaType.APPLICATION_JSON_TYPE)
         executeRequest(request, "activate") { }
     }
@@ -92,14 +92,14 @@ class Camunda7RestClient(
             append("?skipCustomListeners=false&skipIoMappings=false&skipSubprocesses=false")
             reason?.let { append("&deleteReason=${URLEncoder.encode(it, Charsets.UTF_8)}") }
         }
-        val request = HttpRequest.DELETE<String>("$baseUrl/process-instance/$instanceId$params")
+        val request = HttpRequest.DELETE<String>("$baseUrl/process-instance/${encodePathSegment(instanceId)}$params")
         executeRequest(request, "delete") { }
     }
 
     // ========== Tasks ==========
 
     fun getTask(taskId: String): JsonNode {
-        val request = HttpRequest.GET<String>("$baseUrl/task/$taskId")
+        val request = HttpRequest.GET<String>("$baseUrl/task/${encodePathSegment(taskId)}")
         return executeRequest(request, "getTask") { response ->
             objectMapper.readTree(response.body() as String)
         }
@@ -108,8 +108,8 @@ class Camunda7RestClient(
     fun queryTasks(assignee: String?, processInstanceId: String?, maxResults: Int?): List<JsonNode> {
         val params = buildString {
             val parts = mutableListOf<String>()
-            assignee?.let { parts.add("assignee=$it") }
-            processInstanceId?.let { parts.add("processInstanceId=$it") }
+            assignee?.let { parts.add("assignee=${URLEncoder.encode(it, Charsets.UTF_8)}") }
+            processInstanceId?.let { parts.add("processInstanceId=${URLEncoder.encode(it, Charsets.UTF_8)}") }
             maxResults?.let { parts.add("maxResults=$it") }
             if (parts.isNotEmpty()) append("?${parts.joinToString("&")}")
         }
@@ -124,14 +124,14 @@ class Camunda7RestClient(
         val body = objectMapper.createObjectNode().apply {
             set<ObjectNode>("variables", convertToVariableMap(variables))
         }
-        val request = HttpRequest.POST("$baseUrl/task/$taskId/complete", body.toString())
+        val request = HttpRequest.POST("$baseUrl/task/${encodePathSegment(taskId)}/complete", body.toString())
             .contentType(MediaType.APPLICATION_JSON_TYPE)
         executeRequest(request, "completeTask") { }
     }
 
     fun assignTask(taskId: String, userId: String) {
         val body = objectMapper.createObjectNode().apply { put("userId", userId) }.toString()
-        val request = HttpRequest.POST("$baseUrl/task/$taskId/assignee", body)
+        val request = HttpRequest.POST("$baseUrl/task/${encodePathSegment(taskId)}/assignee", body)
             .contentType(MediaType.APPLICATION_JSON_TYPE)
         executeRequest(request, "assignTask") { }
     }
@@ -139,7 +139,7 @@ class Camunda7RestClient(
     // ========== Process Definition ==========
 
     fun getProcessDefinitionXml(processDefinitionId: String): String {
-        val request = HttpRequest.GET<String>("$baseUrl/process-definition/$processDefinitionId/xml")
+        val request = HttpRequest.GET<String>("$baseUrl/process-definition/${encodePathSegment(processDefinitionId)}/xml")
         return executeRequest(request, "getDefinitionXml") { response ->
             val json = objectMapper.readTree(response.body() as String)
             json.get("bpmn20Xml")?.asText()
@@ -150,14 +150,14 @@ class Camunda7RestClient(
     // ========== History ==========
 
     fun getHistoricProcessInstance(processInstanceId: String): JsonNode {
-        val request = HttpRequest.GET<String>("$baseUrl/history/process-instance/$processInstanceId")
+        val request = HttpRequest.GET<String>("$baseUrl/history/process-instance/${encodePathSegment(processInstanceId)}")
         return executeRequest(request, "getHistoricInstance") { response ->
             objectMapper.readTree(response.body() as String)
         }
     }
 
     fun getIncidents(processInstanceId: String): JsonNode {
-        val request = HttpRequest.GET<String>("$baseUrl/incident?processInstanceId=$processInstanceId")
+        val request = HttpRequest.GET<String>("$baseUrl/incident?processInstanceId=${URLEncoder.encode(processInstanceId, Charsets.UTF_8)}")
         return executeRequest(request, "getIncidents") { response ->
             objectMapper.readTree(response.body() as String)
         }
@@ -238,6 +238,8 @@ class Camunda7RestClient(
         }
         return result
     }
+
+    private fun encodePathSegment(value: String): String = URLEncoder.encode(value, Charsets.UTF_8).replace("+", "%20")
 
     private fun inferType(value: Any): String = when (value) {
         is String -> "String"
