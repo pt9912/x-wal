@@ -1,7 +1,7 @@
 # Plan: Use-Case-Level Tracing/Metrics für alle Use Cases abschliessen
 
 ## Ziel
-Alle 19 Use Cases sollen nach einem einheitlichen Muster für:
+Alle 18 Use Cases sollen nach einem einheitlichen Muster für:
 - Tracing via `TracedUseCaseDecorator`
 - Metrics via `MeteredUseCaseDecorator`
 
@@ -9,13 +9,13 @@ ausgehändigt werden.
 
 Das Ziel ist:
 - volle Beobachtbarkeit auf Use-Case-Ebene
-- konsistente Operation-Namen
+- konsistente Operation-Namen im bisherigen Projektstil (`workflow.*`, `instance.*`, `task.*`, `adapter.*`)
 - reproduzierbare Metriken/Spans (Fehler inkl. Error-Tagging)
 - Abnahmekriterium `Use-Case-Level Tracing/Metrics` in `docs/MVP-Plan-2.0.0.md`.
 
 ## Ist-Stand (Code-Stand)
 
-- Vollständig dekoriert:  
+- Vollständig dekoriert:
   - `CreateWorkflowUseCase`
   - `StartWorkflowUseCase`
   - `SuspendInstanceUseCase`
@@ -43,8 +43,8 @@ Das Ziel ist:
    - Verwendung der bestehenden Decorator-Typen:
      - `com.xwal.decorator.TracedUseCaseDecorator`
      - `com.xwal.decorator.MeteredUseCaseDecorator`
-   - Operation Names im Format `domain.action` weiterführen.
-   - Bei allen 19 Use Cases Reihenfolge `traced -> metered -> impl`.
+   - Operation-Namen im Format `domain.action` weiterführen.
+   - Bei allen 18 Use Cases Reihenfolge `traced -> metered -> impl`.
 
 2. `WorkflowUseCaseFactory` vereinheitlichen
    - `getWorkflowUseCase`, `listWorkflowsUseCase`, `updateWorkflowUseCase`, `deleteWorkflowUseCase`, `getInstanceUseCase`, `getInstanceVariablesUseCase` auf Decorator-Kette umstellen.
@@ -61,16 +61,20 @@ Das Ziel ist:
 5. Metrik-/Tracing-Namensschema abstimmen
    - Standardisierte Operationen je Use Case:
      - `workflow.create`, `workflow.get`, `workflow.list`, `workflow.update`, `workflow.delete`
-     - `workflow.start_instance`, `workflow.get_instance`, `workflow.instance_variables`
-     - `workflow.suspend`, `workflow.resume`, `workflow.cancel`
+     - `workflow.start`, `instance.get`, `instance.variables`
+     - `instance.suspend`, `instance.resume`, `instance.cancel`
      - `task.query`, `task.complete`, `task.assign`, `task.get`
      - `adapter.register`, `adapter.deregister`, `adapter.healthcheck`, `adapter.sync_instances`
-   - In `docs/hexagonal-migration.md` nur ändern, falls dort benannte Metriken referenziert werden.
+   - In `docs/hexagonal-migration.md` nur ändern, falls dort konkrete Metrik-/Span-Namen referenziert werden.
 
 6. Tests ergänzen
    - Neue Testfälle in `app/src/test/kotlin/com/xwal/factory/FactoryWiringTest.kt`:
-     - Für jeden bisher un-dekorierten Use Case: Ausführung mit Mock-Span/Mock-Counter-Hook prüfen.
-     - Erwartung: Tracer und Meter werden mindestens einmal aufgerufen.
+     - Zielgerichtete Verifikation für bisher un-dekorierte Use Cases:
+       - `getWorkflowUseCase`, `listWorkflowsUseCase`, `updateWorkflowUseCase`, `deleteWorkflowUseCase`
+       - `getInstanceUseCase`, `getInstanceVariablesUseCase`
+       - `assignTaskUseCase`, `getTaskUseCase`, `completeTaskUseCase`
+       - `registerAdapterUseCase`, `deregisterAdapterUseCase`, `healthCheckAdapterUseCase`, `syncInstanceStateUseCase`
+     - Erwartung: `tracer.spanBuilder(<operation>).startSpan()` und `meter.counterBuilder(<operation>.total)` werden ausgelöst, wenn der Use Case ausgeführt wird.
    - Regressionstest für `Cancel`/`Complete`:
      - bestehende manuelle Pfade entfernen, gleicher Interceptor-Flow wie Standard-Dekoratoren.
 
@@ -89,7 +93,7 @@ Das Ziel ist:
 
 ## Akzeptanzkriterien
 
-- Alle 19 Use Cases sind über eine einheitliche `traced + metered` Kette verdrahtet.
+- Alle 18 Use Cases sind über eine einheitliche `traced + metered` Kette verdrahtet.
 - Kein Use Case verbleibt nur mit manueller Span/Counter-Logik.
 - `docs/MVP-Plan-2.0.0.md` zeigt die Aufgabe als erledigt.
-- Es gibt keine regressiven Änderungen an 77 bestehenden Tests.
+- Die bestehende Test-Suite läuft nach Umbau stabil (keine Regressionen durch die Decorator-Anpassungen).
