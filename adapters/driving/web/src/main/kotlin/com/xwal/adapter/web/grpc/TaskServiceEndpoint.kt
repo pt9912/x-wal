@@ -16,11 +16,8 @@ class TaskServiceEndpoint(
     private val completeTask: CompleteTaskUseCase
 ) : TaskServiceGrpc.TaskServiceImplBase() {
 
-    override fun queryTasks(
-        request: QueryTasksRequest,
-        responseObserver: StreamObserver<QueryTasksResponse>
-    ) {
-        handleGrpc(responseObserver) {
+    override fun queryTasks(request: QueryTasksRequest, responseObserver: StreamObserver<QueryTasksResponse>) =
+        GrpcErrorMapper.handle(responseObserver) {
             val filter = TaskFilter(
                 assignee = if (request.hasAssignee()) request.assignee else null,
                 status = if (request.hasStatus()) runCatching { TaskStatus.valueOf(request.status.uppercase()) }.getOrNull() else null,
@@ -30,34 +27,14 @@ class TaskServiceEndpoint(
             val tasks = queryTasks.execute(filter)
             QueryTasksResponse.newBuilder()
                 .addAllTasks(tasks.map(GrpcTaskMapper::toProto))
-                .setTotal(tasks.size)
-                .build()
+                .setTotal(tasks.size).build()
         }
-    }
 
-    override fun completeTask(
-        request: com.xwal.adapter.web.grpc.proto.CompleteTaskRequest,
-        responseObserver: StreamObserver<com.xwal.adapter.web.grpc.proto.TaskResponse>
-    ) {
-        handleGrpc(responseObserver) {
+    override fun completeTask(request: com.xwal.adapter.web.grpc.proto.CompleteTaskRequest, responseObserver: StreamObserver<com.xwal.adapter.web.grpc.proto.TaskResponse>) =
+        GrpcErrorMapper.handle(responseObserver) {
             val taskId = TaskId(request.taskId)
             completeTask.execute(CompleteTaskUseCase.Command(taskId, request.variablesMap.toMap()))
             com.xwal.adapter.web.grpc.proto.TaskResponse.newBuilder()
-                .setId(request.taskId)
-                .setStatus("COMPLETED")
-                .build()
+                .setId(request.taskId).setStatus("COMPLETED").build()
         }
-    }
-
-    private fun <T> handleGrpc(responseObserver: StreamObserver<T>, block: () -> T) {
-        try {
-            val result = block()
-            responseObserver.onNext(result)
-            responseObserver.onCompleted()
-        } catch (e: Exception) {
-            responseObserver.onError(
-                io.grpc.Status.INTERNAL.withDescription(e.message).withCause(e).asRuntimeException()
-            )
-        }
-    }
 }

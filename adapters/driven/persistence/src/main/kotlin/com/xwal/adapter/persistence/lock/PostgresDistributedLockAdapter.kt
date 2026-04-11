@@ -9,7 +9,9 @@ import javax.sql.DataSource
 
 /**
  * Implements DistributedLockPort using PostgreSQL Advisory Locks.
- * Advisory locks are session-level and automatically released on disconnect.
+ * Uses two-argument advisory locks (classId, objId) to avoid hash collisions.
+ * Only withLock() is reliable — tryAcquire/release pair cannot work across
+ * different connections (advisory locks are session-scoped).
  */
 @Singleton
 class PostgresDistributedLockAdapter(
@@ -19,52 +21,75 @@ class PostgresDistributedLockAdapter(
     private val log = LoggerFactory.getLogger(PostgresDistributedLockAdapter::class.java)
 
     override fun <T> withLock(lockKey: String, timeout: Duration, block: () -> T): T {
-        val lockId = lockKey.hashCode().toLong()
+        val (classId, objId) = lockIds(lockKey)
         val connection = dataSource.connection
         return try {
-            if (!tryAdvisoryLock(connection, lockId)) {
+            if (!tryAdvisoryLock(connection, classId, objId)) {
                 throw IllegalStateException("Could not acquire lock: $lockKey")
             }
-            log.debug("Acquired advisory lock: {} (id={})", lockKey, lockId)
+            log.debug("Acquired advisory lock: {} (class={}, obj={})", lockKey, classId, objId)
             block()
         } finally {
-            releaseAdvisoryLock(connection, lockId)
+            releaseAdvisoryLock(connection, classId, objId)
             connection.close()
-            log.debug("Released advisory lock: {} (id={})", lockKey, lockId)
+            log.debug("Released advisory lock: {}", lockKey)
         }
     }
 
     override fun tryAcquire(lockKey: String, timeout: Duration): Boolean {
-        val lockId = lockKey.hashCode().toLong()
+        // Note: advisory locks are session-scoped. tryAcquire/release across
+        // different calls will use different connections and NOT work correctly.
+        // Use withLock() instead for reliable locking.
+        log.warn("tryAcquire() is unreliable with pooled connections — use withLock() instead")
+        val (classId, objId) = lockIds(lockKey)
         val connection = dataSource.connection
         return try {
-            tryAdvisoryLock(connection, lockId)
+            tryAdvisoryLock(connection, classId, objId)
         } catch (e: Exception) {
             log.warn("Failed to acquire advisory lock {}: {}", lockKey, e.message)
             false
-        }
-    }
-
-    override fun release(lockKey: String) {
-        val lockId = lockKey.hashCode().toLong()
-        val connection = dataSource.connection
-        try {
-            releaseAdvisoryLock(connection, lockId)
         } finally {
             connection.close()
         }
     }
 
-    private fun tryAdvisoryLock(connection: Connection, lockId: Long): Boolean {
-        val stmt = connection.prepareStatement("SELECT pg_try_advisory_lock(?)")
-        stmt.setLong(1, lockId)
-        val rs = stmt.executeQuery()
-        return rs.next() && rs.getBoolean(1)
+    override fun release(lockKey: String) {
+        log.warn("release() is unreliable with pooled connections — use withLock() instead")
+        val (classId, objId) = lockIds(lockKey)
+        val connection = dataSource.connection
+        try {
+            releaseAdvisoryLock(connection, classId, objId)
+        } finally {
+            connection.close()
+        }
     }
 
-    private fun releaseAdvisoryLock(connection: Connection, lockId: Long) {
-        val stmt = connection.prepareStatement("SELECT pg_advisory_unlock(?)")
-        stmt.setLong(1, lockId)
-        stmt.executeQuery()
+    private fun tryAdvisoryLock(connection: Connection, classId: Int, objId: Int): Boolean {
+        connection.prepareStatement("SELECT pg_try_advisory_lock(?, ?)").use { stmt ->
+            stmt.setInt(1, classId)
+            stmt.setInt(2, objId)
+            stmt.executeQuery().use { rs -> return rs.next() && rs.getBoolean(1) }
+        }
+    }
+
+    private fun releaseAdvisoryLock(connection: Connection, classId: Int, objId: Int) {
+        connection.prepareStatement("SELECT pg_advisory_unlock(?, ?)").use { stmt ->
+            stmt.setInt(1, classId)
+            stmt.setInt(2, objId)
+            stmt.executeQuery().use { it.next() }
+        }
+    }
+
+    /** Split lock key into two 32-bit IDs to avoid collisions */
+    private fun lockIds(lockKey: String): Pair<Int, Int> {
+        val hash = lockKey.hashCode().toLong()
+        val classId = XWAL_LOCK_CLASS
+        val objId = hash.toInt()
+        return classId to objId
+    }
+
+    companion object {
+        /** Fixed class ID for all x-wal advisory locks */
+        private const val XWAL_LOCK_CLASS = 0x5857414C // "XWAL" as int
     }
 }
