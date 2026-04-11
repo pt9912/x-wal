@@ -109,21 +109,19 @@ app/             Application.kt, 4 Factory-Klassen, Scheduler, application.yml
 
 - [x] gRPC Endpoint-Implementierung (WorkflowServiceEndpoint, TaskServiceEndpoint)
 - [ ] Use-Case Observability-Decorators (Tracing/Metrics pro Use Case, aktuell teils implementiert)
-- [x] DistributedLockPort Implementierung (PostgreSQL Advisory Locks)
 - [ ] JaCoCo Coverage Reports + Ziel 80%+ verifizieren
+- [ ] Connection Pooling fuer Engine REST Clients (HttpClientFactory)
 - [ ] Erweiterte Adapter-Endpunkte (GET /adapters, GET /adapters/enabled, GET /adapters/healthy) sind noch offen
 
 ### Prioritaet 2 — Engine-Erweiterung
 
 - [ ] Zeebe/Camunda 8 Adapter (gRPC-basiert, S-03)
 - [x] Testcontainers E2E Tests (Camunda7 + Flowable Urlaubsantrag)
-- [ ] Connection Pooling fuer Engine REST Clients (HttpClientFactory) — `HttpClientFactory` vorhanden, aber aktuell nutzt `EngineAdapterFactoryImpl` noch `HttpClient.create(URL(...))`
 
 ### Prioritaet 3 — Betrieb
 
 - [ ] Helm Chart fuer Kubernetes Deployment
 - [ ] Grafana Dashboards (vorkonfiguriert)
-- [x] OpenAPI 3.0 Spec generieren + Swagger UI
 - [ ] Rate Limiting / Request Throttling
 
 ### Prioritaet 4 — Post-MVP
