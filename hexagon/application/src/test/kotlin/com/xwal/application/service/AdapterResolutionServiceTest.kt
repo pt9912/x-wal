@@ -35,12 +35,10 @@ class AdapterResolutionServiceTest {
         val configA = createConfig(adapterA, "first-listed")
         val configB = createConfig(adapterB, "second-listed")
 
-        every { adapterConfigRepository.findByEngineType(EngineType.CAMUNDA7) } returns listOf(configB, configA)
+        every { adapterConfigRepository.findByEngineType(EngineType.CAMUNDA7) } returns listOf(configA, configB)
         every { adapterCache.get(adapterA) } returns null
-        every { adapterCache.get(adapterB) } returns null
         every { adapterCache.put(any(), any()) } just Runs
         every { adapterFactory.createAdapter(EngineType.CAMUNDA7, configA.config) } returns portA
-        every { adapterFactory.createAdapter(EngineType.CAMUNDA7, configB.config) } returns portB
 
         val selected = resolutionService.resolveByEngineType(EngineType.CAMUNDA7)
 

@@ -10,19 +10,23 @@ import java.util.UUID
 @JvmInline
 value class TaskId(val value: String) {
 
-    private val parsed = parse(value)
-
     init {
-        require(parsed.engineTaskId.isNotBlank()) {
-            "TaskId must include a non-empty taskId, got: $value"
+        val firstColon = value.indexOf(':')
+        require(firstColon > 0) { "TaskId must be in format 'ENGINE_TYPE:taskId', got: $value" }
+        require(runCatching { EngineType.valueOf(value.substring(0, firstColon)) }.isSuccess) {
+            "Unknown engine type in TaskId: ${value.substringBefore(':')}"
         }
+        require(value.substring(firstColon + 1).isNotBlank()) { "TaskId must include a non-empty taskId, got: $value" }
     }
 
     val engineType: EngineType
-        get() = parsed.engineType
+        get() = parse(value).engineType
 
     val adapterId: EngineAdapterId?
-        get() = parsed.adapterId
+        get() = parse(value).adapterId
+
+    val engineTaskId: String
+        get() = parse(value).engineTaskId
 
     private fun parse(taskId: String): ParsedTaskId {
         val firstColon = taskId.indexOf(':')
@@ -57,9 +61,6 @@ value class TaskId(val value: String) {
     }
 
     private fun isAdapterId(value: String): Boolean = runCatching { UUID.fromString(value) }.isSuccess
-
-    val engineTaskId: String
-        get() = parsed.engineTaskId
 
     companion object {
         fun of(engineType: EngineType, engineTaskId: String): TaskId =
