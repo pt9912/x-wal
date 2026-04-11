@@ -15,6 +15,7 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation(libs.grpc.stub)
     implementation("io.grpc:grpc-api:${libs.versions.grpc.get()}")
+    implementation("io.projectreactor:reactor-core")
 }
 
 micronaut {

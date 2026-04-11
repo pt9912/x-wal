@@ -14,7 +14,9 @@ object AdapterResilientDecorator {
     fun <T> execute(
         adapterName: String,
         config: Resilience4jConfig,
-        supplier: Supplier<T>
+        supplier: Supplier<T>,
+        operationType: String = "unknown",
+        dlq: DeadLetterQueue? = null
     ): T {
         val circuitBreaker = config.getCircuitBreaker(adapterName)
         val retry = config.getRetry(adapterName)
@@ -27,25 +29,25 @@ object AdapterResilientDecorator {
             decorated.get()
         } catch (e: CallNotPermittedException) {
             log.error("Circuit breaker OPEN for adapter {}", adapterName)
-            throw AdapterOperationException(
-                engineType = adapterName, operation = "execute",
-                message = "Circuit breaker is open for $adapterName", cause = e
-            )
+            val ex = AdapterOperationException(adapterName, operationType, "Circuit breaker is open for $adapterName", e)
+            dlq?.add(FailedOperation(adapterName, operationType, ex.message, "CIRCUIT_OPEN"))
+            throw ex
         } catch (e: Exception) {
             log.error("Resilient execution failed for {}: {}", adapterName, e.message)
-            throw if (e is AdapterOperationException) e
-            else AdapterOperationException(
-                engineType = adapterName, operation = "execute",
-                message = "Operation failed after retries: ${e.message}", cause = e
-            )
+            val ex = if (e is AdapterOperationException) e
+                else AdapterOperationException(adapterName, operationType, "Operation failed after retries: ${e.message}", e)
+            dlq?.add(FailedOperation(adapterName, operationType, ex.message, e.javaClass.simpleName))
+            throw ex
         }
     }
 
     fun executeVoid(
         adapterName: String,
         config: Resilience4jConfig,
-        runnable: Runnable
+        runnable: Runnable,
+        operationType: String = "unknown",
+        dlq: DeadLetterQueue? = null
     ) {
-        execute(adapterName, config, Supplier { runnable.run(); null })
+        execute(adapterName, config, Supplier { runnable.run(); null }, operationType, dlq)
     }
 }
