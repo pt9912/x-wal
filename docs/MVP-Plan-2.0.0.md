@@ -6,8 +6,8 @@
 ### API-Umsetzungsstand
 
 - REST: Kern-API vollständig dokumentiert und implementiert (18 Kern-Endpunkte).
-- gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
-- OpenAPI/Swagger: Spezifikation und UI sind noch offen und werden als Folgeaufgabe geführt.
+- gRPC: Protobuf ist vorhanden und Endpoint-Implementierung in `adapters/driving/web` ist abgeschlossen.
+- OpenAPI/Swagger: Spezifikation und UI sind per OpenAPI-Konfiguration verfügbar.
 - Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
 
 ---
@@ -20,7 +20,7 @@
 | **Domain-Kern** | Done | 17 Modelle, 8 Exceptions, 4 Services, IWM Validator |
 | **Use Cases** | Done | 19 Use Cases (Workflow, Task, Adapter, Sync) |
 | **REST API** | Done (Kern-API) | 18 Kern-Endpunkte, DTOs, Exception Handler, Version Filter |
-| **gRPC API** | Proto definiert, Endpoints offen | workflow.proto kopiert, Endpoint-Impl offen |
+| **gRPC API** | Done | workflow.proto kopiert, Endpoint-Implementierung in `adapters/driving/web` |
 | **Persistenz** | Done | PostgreSQL 16, Flyway (3 Migrationen), 3 Repositories |
 | **Engine-Adapter** | Done | Camunda 7 + Flowable (REST), IWM-BPMN Transformation |
 | **Security** | Done | Keycloak OAuth2/JWT, Rollen-Mapping |
@@ -39,7 +39,7 @@
 | **M-02** | Engine-Adapter Camunda, Flowable | Done | Camunda7Adapter, FlowableAdapter (REST-basiert), IWM-BPMN Transformer |
 | **M-03** | Automatische Engine-Auswahl | Done | EngineRoutingLogic (Prioritaet, Health, Target-Engine-Hint) |
 | **M-04** | Persistenz-Abstraktion | Done | PostgreSQL, Flyway, 3 Entities, 3 Repository-Adapter (hexagonal) |
-| **M-05** | REST-API (OpenAPI 3) + gRPC | Teilweise | REST komplett, gRPC Proto definiert, Endpoint-Implementierung offen |
+| **M-05** | REST-API (OpenAPI 3) + gRPC | Done | REST komplett, OpenAPI/Swagger konfiguriert, gRPC Endpoints (WorkflowServiceEndpoint, TaskServiceEndpoint) implementiert |
 | **M-06** | OAuth2/OpenID Connect (Keycloak) | Done | SecurityConfiguration, KeycloakRolesMapper, 4 Scopes |
 | **M-07** | OpenTelemetry Tracing/Logging | Basis | ObservabilityConfiguration (Tracer/Meter), JSON Logs, Use-Case-Decorators offen |
 | **M-08** | Docker-Compose + DevContainer | Done | docker-compose.dev.yml, .devcontainer/, Dockerfile |
@@ -107,23 +107,23 @@ app/             Application.kt, 4 Factory-Klassen, Scheduler, application.yml
 
 ### Prioritaet 1 — Funktionale Luecken
 
-- [ ] gRPC Endpoint-Implementierung (WorkflowServiceEndpoint, TaskServiceEndpoint)
-- [ ] Use-Case Observability-Decorators (Tracing/Metrics pro Use Case)
-- [ ] DistributedLockPort Implementierung (PostgreSQL Advisory Locks)
+- [x] gRPC Endpoint-Implementierung (WorkflowServiceEndpoint, TaskServiceEndpoint)
+- [ ] Use-Case Observability-Decorators (Tracing/Metrics pro Use Case, aktuell teils implementiert)
+- [x] DistributedLockPort Implementierung (PostgreSQL Advisory Locks)
 - [ ] JaCoCo Coverage Reports + Ziel 80%+ verifizieren
 - [ ] Erweiterte Adapter-Endpunkte (GET /adapters, GET /adapters/enabled, GET /adapters/healthy) sind noch offen
 
 ### Prioritaet 2 — Engine-Erweiterung
 
 - [ ] Zeebe/Camunda 8 Adapter (gRPC-basiert, S-03)
-- [ ] Testcontainers E2E Tests (Camunda7 + Flowable Urlaubsantrag)
-- [ ] Connection Pooling fuer Engine REST Clients (HttpClientFactory)
+- [x] Testcontainers E2E Tests (Camunda7 + Flowable Urlaubsantrag)
+- [ ] Connection Pooling fuer Engine REST Clients (HttpClientFactory) — `HttpClientFactory` vorhanden, aber aktuell nutzt `EngineAdapterFactoryImpl` noch `HttpClient.create(URL(...))`
 
 ### Prioritaet 3 — Betrieb
 
 - [ ] Helm Chart fuer Kubernetes Deployment
 - [ ] Grafana Dashboards (vorkonfiguriert)
-- [ ] OpenAPI 3.0 Spec generieren + Swagger UI
+- [x] OpenAPI 3.0 Spec generieren + Swagger UI
 - [ ] Rate Limiting / Request Throttling
 
 ### Prioritaet 4 — Post-MVP
@@ -150,9 +150,9 @@ app/             Application.kt, 4 Factory-Klassen, Scheduler, application.yml
 - [x] Docker Build + docker-compose Dev-Umgebung
 - [x] CI/CD Workflows (Build, Test, Docker, Docs)
 - [x] 77 Tests gruen
-- [ ] gRPC Endpoints implementiert
-- [ ] Use-Case-Level Tracing/Metrics
-- [ ] E2E Urlaubsantrag-Test: Camunda7 + Flowable
+- [x] gRPC Endpoints implementiert
+- [ ] Use-Case-Level Tracing/Metrics (teilweise: Write-Use-Cases instrumentiert, einzelne read-only Use-Cases noch ohne durchgängigen Wrapper)
+- [x] E2E Urlaubsantrag-Test: Camunda7 + Flowable
 - [ ] Test-Coverage >= 80%
 
 ---
