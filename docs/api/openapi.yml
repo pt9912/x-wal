@@ -1,0 +1,512 @@
+openapi: 3.0.1
+info:
+  title: Service
+  version: 1.0.0
+paths:
+  /api/v1/adapters:
+    post:
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterAdapterRequest"
+        required: true
+      responses:
+        "200":
+          description: register 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/adapters/health-check:
+    post:
+      operationId: healthCheckAll
+      responses:
+        "200":
+          description: healthCheckAll 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/adapters/{id}:
+    delete:
+      operationId: deregister
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: deregister 200 response
+  /api/v1/adapters/{id}/health-check:
+    post:
+      operationId: healthCheckSingle
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: healthCheckSingle 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v1/instances/{id}:
+    get:
+      operationId: get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: get 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceResponse"
+  /api/v1/instances/{id}/variables:
+    get:
+      operationId: getVariables
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: getVariables 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+  /api/v1/tasks:
+    get:
+      operationId: list
+      parameters:
+      - name: assignee
+        in: query
+        explode: false
+        schema:
+          type: string
+          nullable: true
+      - name: status
+        in: query
+        explode: false
+        schema:
+          type: string
+          nullable: true
+      - name: limit
+        in: query
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          nullable: true
+      - name: offset
+        in: query
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          nullable: true
+      responses:
+        "200":
+          description: list 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskResponse"
+  /api/v1/tasks/{taskId}:
+    get:
+      operationId: get_1
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: get_1 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResponse"
+  /api/v1/tasks/{taskId}/assign:
+    post:
+      operationId: assign
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: assignee
+        in: query
+        required: true
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: assign 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResponse"
+  /api/v1/tasks/{taskId}/complete:
+    post:
+      operationId: complete
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteTaskRequest"
+        required: true
+      responses:
+        "200":
+          description: complete 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResponse"
+  /api/v1/tasks/{taskId}/unassign:
+    post:
+      operationId: unassign
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: unassign 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResponse"
+  /api/v1/workflows:
+    get:
+      operationId: list_1
+      parameters:
+      - name: status
+        in: query
+        explode: false
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "200":
+          description: list_1 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkflowResponse"
+    post:
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkflowRequest"
+        required: true
+      responses:
+        "200":
+          description: create 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowResponse"
+  /api/v1/workflows/instances/{instanceId}/cancel:
+    post:
+      operationId: cancel
+      parameters:
+      - name: instanceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: cancel 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceResponse"
+  /api/v1/workflows/instances/{instanceId}/resume:
+    post:
+      operationId: resume
+      parameters:
+      - name: instanceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: resume 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceResponse"
+  /api/v1/workflows/instances/{instanceId}/suspend:
+    post:
+      operationId: suspend
+      parameters:
+      - name: instanceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: suspend 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceResponse"
+  /api/v1/workflows/{id}:
+    get:
+      operationId: get_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: get_2 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowResponse"
+    delete:
+      operationId: delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: delete 200 response
+  /api/v1/workflows/{id}/start:
+    post:
+      operationId: start
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartInstanceRequest"
+        required: true
+      responses:
+        "200":
+          description: start 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceResponse"
+components:
+  schemas:
+    CompleteTaskRequest:
+      type: object
+      properties:
+        variables:
+          type: object
+          additionalProperties:
+            type: object
+          nullable: true
+        completedBy:
+          type: string
+          nullable: true
+    CreateWorkflowRequest:
+      required:
+      - iwmDefinition
+      - name
+      - version
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+        version:
+          minLength: 1
+          type: string
+        description:
+          type: string
+          nullable: true
+        iwmDefinition:
+          type: string
+        createdBy:
+          type: string
+          nullable: true
+    InstanceResponse:
+      required:
+      - id
+      - status
+      - workflowId
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workflowId:
+          type: string
+          format: uuid
+        engineInstanceId:
+          type: string
+          nullable: true
+        status:
+          type: string
+        businessKey:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        endedAt:
+          type: string
+          format: date-time
+          nullable: true
+    RegisterAdapterRequest:
+      required:
+      - endpointUrl
+      - engineType
+      - name
+      - priority
+      type: object
+      properties:
+        name:
+          type: string
+        engineType:
+          type: string
+        endpointUrl:
+          type: string
+        engineVersion:
+          type: string
+          nullable: true
+        priority:
+          type: integer
+          format: int32
+        createdBy:
+          type: string
+          nullable: true
+    StartInstanceRequest:
+      type: object
+      properties:
+        businessKey:
+          type: string
+          nullable: true
+        variables:
+          type: object
+          additionalProperties:
+            type: object
+          nullable: true
+        startedBy:
+          type: string
+          nullable: true
+    TaskResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          nullable: true
+        assignee:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        workflowId:
+          type: string
+          nullable: true
+        instanceId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+        formData:
+          type: object
+          additionalProperties:
+            type: object
+          nullable: true
+    WorkflowResponse:
+      required:
+      - createdAt
+      - id
+      - name
+      - status
+      - updatedAt
+      - version
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
