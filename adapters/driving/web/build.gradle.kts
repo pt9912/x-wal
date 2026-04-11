@@ -11,6 +11,7 @@ dependencies {
     ksp("io.micronaut:micronaut-inject-kotlin")
     ksp("io.micronaut.serde:micronaut-serde-processor")
     ksp("io.micronaut.security:micronaut-security-annotations")
+    ksp("io.micronaut.openapi:micronaut-openapi")
 
     implementation("io.micronaut:micronaut-http-server-netty")
     implementation("io.projectreactor:reactor-core")

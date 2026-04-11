@@ -16,8 +16,10 @@ dependencies {
     implementation(project(":adapters:driven:observability"))
 
     ksp("io.micronaut:micronaut-inject-kotlin")
+    ksp("io.micronaut.openapi:micronaut-openapi")
 
     implementation(libs.otel.api)
+    implementation(libs.swagger.annotations)
 
     runtimeOnly(libs.logback)
     runtimeOnly(libs.logstash.encoder)
