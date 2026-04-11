@@ -270,7 +270,7 @@ Client → JWT Token (Keycloak) → x-wal API
 | Observability | OpenTelemetry | 1.32.0 |
 | Resilience | Resilience4j | 2.1.0 |
 | Workflow Engines | Camunda 7 / Flowable | 7.24.0 / 7.0.0 |
-| Tests | JUnit 5, MockK, Testcontainers | 5.10.1 / 1.13.9 / 1.21.4 |
+| Tests | JUnit 5, MockK, Testcontainers | 5.10.1 / 1.13.9 / 2.0.4 |
 | CLI | Picocli | 4.7.5 |
 | Container | Docker (Alpine JRE 21) | Multi-Stage |
 | CI/CD | GitHub Actions | 4 Workflows |
