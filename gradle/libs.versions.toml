@@ -14,7 +14,7 @@ flowable = "7.0.0"
 logback = "1.4.14"
 junit = "5.10.1"
 mockk = "1.13.9"
-testcontainers = "1.21.4"
+testcontainers = "2.0.4"
 assertj = "3.24.2"
 json-schema-validator = "2.0.0"
 picocli = "4.7.5"
@@ -65,8 +65,8 @@ junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jun
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
-testcontainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
-testcontainers-postgres = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainers-junit = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgres = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 
 # Misc
