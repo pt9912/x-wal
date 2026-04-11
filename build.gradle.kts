@@ -46,4 +46,26 @@ subprojects {
             html.required.set(true)
         }
     }
+
+    tasks.withType<JacocoCoverageVerification> {
+        val minCoverage = when (project.path) {
+            ":app" -> "0.60"                     // Wiring/Factories — lower threshold
+            ":adapters:driving:web" -> "0.0"     // Controllers tested via integration
+            ":adapters:driving:cli" -> "0.0"     // Standalone CLI
+            ":adapters:driven:identity" -> "0.0" // Security config — tested at runtime
+            ":adapters:driven:observability" -> "0.0" // Config beans
+            else -> "0.80"                       // Hexagon + driven adapters
+        }
+        violationRules {
+            rule {
+                limit {
+                    minimum = minCoverage.toBigDecimal()
+                }
+            }
+        }
+    }
+
+    tasks.named("check") {
+        dependsOn(tasks.withType<JacocoCoverageVerification>())
+    }
 }
