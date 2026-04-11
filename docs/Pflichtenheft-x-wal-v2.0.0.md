@@ -6,6 +6,13 @@
 
 **Implementierungsstand:** Hexagonale Architektur vollstaendig umgesetzt. 10 von 12 Muss-Anforderungen implementiert.
 
+### API-Umsetzungsstand
+
+- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
+- OpenAPI/Swagger: Spezifikation und UI sind noch offen und werden als Folgeaufgabe geführt.
+- Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
+
 ---
 
 ## 1. Einleitung
@@ -25,7 +32,7 @@ Version 2.0.0 des x-WAL. Gegenueber v1 wurde die Architektur von Layered (Java) 
 ### 1.4 Definitionen
 - **IWM:** Intermediate Workflow Model (kanonisches JSON-Datenmodell)
 - **Hexagon:** Domain-Kern (core + ports + application), framework-frei
-- **Driving Adapter:** Primaerer Adapter (REST, gRPC, CLI) — ruft Use Cases auf
+- **Driving Adapter:** Primaerer Adapter (REST, gRPC offen) — ruft Use Cases auf
 - **Driven Adapter:** Sekundaerer Adapter (DB, Engine, Identity) — wird von Use Cases gerufen
 - **Port:** Interface im Domain-Kern (Input Port = Use Case, Output Port = Repository/Adapter)
 
@@ -42,7 +49,7 @@ graph TD
     end
 
     subgraph "x-wal Plattform (Hexagonal)"
-        B("REST/gRPC API<br/>(Driving Adapter)")
+        B("REST API<br/>(Driving Adapter, gRPC offen)")
         C("Use Cases + Domain<br/>(Hexagon)")
         D("Engine Adapter<br/>(Driven Adapter)")
 
@@ -81,7 +88,7 @@ Hexagonale Architektur (Ports & Adapters) mit 10 Gradle-Modulen. Details: [Archi
 
 | ID | Status | Umsetzung | Nachweis |
 |---|---|---|---|
-| **M-01** | Done | 18 REST Endpoints: WorkflowController (8), InstanceController (2), TaskController (5), AdapterController (4). gRPC: workflow.proto (11 RPCs definiert). | Controller kompilieren, Architektur-Tests |
+| **M-01** | Done | 18 REST Endpoints: WorkflowController (8), InstanceController (2), TaskController (5), AdapterController (4). gRPC: workflow.proto (11 RPCs definiert), Endpoints offen. | Controller kompilieren, Architektur-Tests |
 | **M-02** | Done | Camunda7Adapter + FlowableAdapter (jeweils REST-basiert). WorkflowEnginePort Interface. IWM-BPMN Transformer pro Engine. Factory + Cache + Resilience. | 7 Engine-Adapter-Tests |
 | **M-03** | Done | EngineRoutingLogic: Prioritaet, Health-Status, Target-Engine-Hint aus IWM. AdapterResolutionService: Cache-first mit Null-Safety. | 6 Routing-Tests |
 | **M-04** | Done | PostgreSQL 16, Flyway (3 Migrationen), 3 Repository-Adapter (WorkflowRepositoryAdapter, InstanceRepositoryAdapter, AdapterConfigRepositoryAdapter). Entity-Mapper trennen Domain von Persistenz. TransactionPort. | 5 Persistence-Integration-Tests (Testcontainers) |

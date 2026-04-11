@@ -1,5 +1,12 @@
 # x-wal Betriebshandbuch
 
+## API-Umsetzungsstand
+
+- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
+- OpenAPI/Swagger: Spezifikation und UI sind noch offen und werden als Folgeaufgabe geführt.
+- Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
+
 ## Docker Image
 
 ### Image beziehen
@@ -39,8 +46,8 @@ docker run -d \
 
 | Port | Protokoll | Beschreibung |
 |---|---|---|
-| 8080 | HTTP | REST API + Swagger UI + Health |
-| 50051 | gRPC | gRPC API (Workflow + Task Service) |
+| 8080 | HTTP | REST API + Health |
+| 50051 | gRPC | Reserved für gRPC API (Workflow/Task Service, Endpunkte aktuell noch offen) |
 
 ### Health Check
 
@@ -135,7 +142,7 @@ Der Dev-Compose importiert automatisch den Realm `xwal` aus `keycloak/realm-xwal
 ```bash
 TOKEN=$(curl -s -X POST \
   http://localhost:8083/realms/xwal/protocol/openid-connect/token \
-  -d "client_id=xwal-cli" \
+  -d "client_id=xwal-api" \
   -d "username=admin" \
   -d "password=admin123" \
   -d "grant_type=password" | jq -r '.access_token')

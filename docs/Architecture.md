@@ -4,6 +4,13 @@
 **Architektur:** Hexagonal (Ports & Adapters)
 **Stand:** 10. April 2026
 
+### API-Umsetzungsstand
+
+- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
+- OpenAPI/Swagger: Dokumentation noch als offener Punkt (noch nicht end-to-end produktiv geschaltet).
+- Security: aktuelle Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
+
 ---
 
 ## System-Ueberblick
@@ -20,7 +27,7 @@ graph TD
     subgraph "x-wal Plattform"
         subgraph "Driving Adapters"
             REST["REST API<br/>(18 Endpoints)"]
-            GRPC["gRPC API<br/>(11 RPCs)"]
+            GRPC["gRPC API<br/>(11 RPCs vorgesehen, Endpoints offen)"]
             CLI["Migration CLI"]
         end
 
@@ -70,7 +77,7 @@ x-wal/
 │   └── application/                  # Use Cases
 ├── adapters/
 │   ├── driving/                      # Primaere Adapter (rufen Hexagon auf)
-│   │   ├── web/                      # REST + gRPC
+│   │   ├── web/                      # REST + gRPC (gRPC noch offen)
 │   │   └── cli/                      # Migration-Tool
 │   └── driven/                       # Sekundaere Adapter (vom Hexagon gerufen)
 │       ├── persistence/              # PostgreSQL
@@ -136,7 +143,7 @@ Reines Kotlin. Keine Micronaut-Dependencies.
 
 Shared: `AdapterResolutionService` — Cache-first Adapter-Aufloesung mit Null-Safety.
 
-### adapters/driving/web — REST + gRPC
+### adapters/driving/web — REST + gRPC (gRPC noch offen)
 
 | Controller | Endpoints | Scopes |
 |---|---|---|
@@ -244,7 +251,7 @@ Client → JWT Token (Keycloak) → x-wal API
                           (workflow.read, workflow.write, workflow.admin)
 ```
 
-4 Scopes: `workflow.read`, `workflow.write`, `workflow.admin`, `workflow.execute`
+3 Scopes: `workflow.read`, `workflow.write`, `workflow.admin`
 4 Rollen: `admin`, `workflow-designer`, `workflow-executor`, `viewer`
 
 ---

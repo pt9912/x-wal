@@ -4,6 +4,13 @@
 **Quelle:** `/Development/x-wal-v1` (Java 21, Micronaut 4.x, ~13.500 LOC, ~340 Tests)
 **Ziel:** `/Development/x-wal` (Kotlin, Micronaut 4.x, Hexagonale Architektur)
 
+### API-Umsetzungsstand
+
+- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- gRPC: Protobuf ist vorhanden; Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
+- OpenAPI/Swagger: Spezifikation und UI sind noch offen und als Folgeaufgabe geplant.
+- Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
+
 ---
 
 ## Kontext

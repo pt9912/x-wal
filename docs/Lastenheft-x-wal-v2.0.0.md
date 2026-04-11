@@ -7,6 +7,13 @@ Er ermöglicht engineübergreifende Migrationen, Analysen und Generierungen, um 
 
 ### Version 2.0.0 – Stand: 10. April 2026
 
+### API-Umsetzungsstand
+
+- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
+- OpenAPI/Swagger: Spezifikation und UI sind noch offen und werden als Folgeaufgabe geführt.
+- Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
+
 ---
 
 ## 1. Zielbestimmung

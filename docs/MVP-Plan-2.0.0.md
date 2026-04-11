@@ -3,6 +3,13 @@
 **Stand:** 10. April 2026
 **Architektur:** Hexagonal (Kotlin/Micronaut 4.9.4)
 
+### API-Umsetzungsstand
+
+- REST: vollständig dokumentiert und implementiert (18 Endpoints).
+- gRPC: Protobuf ist vorhanden, Endpoint-Implementierung in `adapters/driving/web` ist noch offen.
+- OpenAPI/Swagger: Spezifikation und UI sind noch offen und werden als Folgeaufgabe geführt.
+- Security: aktive Scopes sind `workflow.read`, `workflow.write`, `workflow.admin`.
+
 ---
 
 ## Status-Uebersicht
@@ -13,7 +20,7 @@
 | **Domain-Kern** | Done | 17 Modelle, 8 Exceptions, 4 Services, IWM Validator |
 | **Use Cases** | Done | 19 Use Cases (Workflow, Task, Adapter, Sync) |
 | **REST API** | Done | 18 Endpoints, DTOs, Exception Handler, Version Filter |
-| **gRPC API** | Proto definiert | workflow.proto kopiert, Endpoint-Impl offen |
+| **gRPC API** | Proto definiert, Endpoints offen | workflow.proto kopiert, Endpoint-Impl offen |
 | **Persistenz** | Done | PostgreSQL 16, Flyway (3 Migrationen), 3 Repositories |
 | **Engine-Adapter** | Done | Camunda 7 + Flowable (REST), IWM-BPMN Transformation |
 | **Security** | Done | Keycloak OAuth2/JWT, Rollen-Mapping |
@@ -32,7 +39,7 @@
 | **M-02** | Engine-Adapter Camunda, Flowable | Done | Camunda7Adapter, FlowableAdapter (REST-basiert), IWM-BPMN Transformer |
 | **M-03** | Automatische Engine-Auswahl | Done | EngineRoutingLogic (Prioritaet, Health, Target-Engine-Hint) |
 | **M-04** | Persistenz-Abstraktion | Done | PostgreSQL, Flyway, 3 Entities, 3 Repository-Adapter (hexagonal) |
-| **M-05** | REST-API (OpenAPI 3) + gRPC | Teilweise | REST komplett, gRPC Proto definiert, Endpoint-Impl Phase 7+ |
+| **M-05** | REST-API (OpenAPI 3) + gRPC | Teilweise | REST komplett, gRPC Proto definiert, Endpoint-Implementierung offen |
 | **M-06** | OAuth2/OpenID Connect (Keycloak) | Done | SecurityConfiguration, KeycloakRolesMapper, 4 Scopes |
 | **M-07** | OpenTelemetry Tracing/Logging | Basis | ObservabilityConfiguration (Tracer/Meter), JSON Logs, Use-Case-Decorators offen |
 | **M-08** | Docker-Compose + DevContainer | Done | docker-compose.dev.yml, .devcontainer/, Dockerfile |
