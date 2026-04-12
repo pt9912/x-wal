@@ -73,12 +73,21 @@ Die API ist unter `http://localhost:8080/api/v1/` erreichbar.
 # Alle Tests
 ./gradlew test
 
+# Coverage-Pruefung fuer das app-Modul inkl. JaCoCo-Report
+./gradlew :app:test :app:jacocoTestCoverageVerification :app:jacocoTestReport
+
+# Coverage-Pruefung fuer alle Module ueber den normalen Check-Lauf
+./gradlew check
+
 # Nur Architektur-Tests
 ./gradlew :app:test --tests "com.xwal.ArchitectureTest"
 
 # Nur Persistence Integration Tests
 ./gradlew :adapters:driven:persistence:test
 ```
+
+Der HTML-Report fuer das `app`-Modul liegt danach unter
+`app/build/reports/jacoco/test/html/index.html`.
 
 ### CLI Migration-Tool
 
