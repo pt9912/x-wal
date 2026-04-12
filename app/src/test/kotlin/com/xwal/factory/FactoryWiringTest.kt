@@ -125,14 +125,12 @@ class FactoryWiringTest {
         every { adapterCache.get(any()) } returns enginePort
         every { enginePort.getInstanceVariables(any()) } returns mapOf("foo" to "bar")
 
-        every { transactionPort.executeInTransaction(any()) } answers {
-            val block = it.invocation.args[0] as () -> Any?
-            block()
+        every { transactionPort.executeInTransaction(any<() -> Any?>()) } answers {
+            firstArg<() -> Any?>().invoke()
         }
 
-        every { distributedLock.withLock(any(), any(), any()) } answers {
-            val block = it.invocation.args[2] as () -> Any?
-            block()
+        every { distributedLock.withLock(any(), any(), any<() -> Any?>()) } answers {
+            thirdArg<() -> Any?>().invoke()
         }
         every { instanceRepo.findForSync(any(), any(), any()) } returns emptyList()
         every { adapterFactory.createAdapter(any(), any()) } returns enginePort
