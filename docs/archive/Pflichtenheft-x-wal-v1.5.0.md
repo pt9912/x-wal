@@ -446,20 +446,20 @@ Siehe Lastenheft Abschnitt 13.
 ## 12. Referenzen & Dokumentation
 
 **Technische Dokumentation:**
-- [Architecture.md](Architecture.md) - Systemarchitektur (Stand Sprint 2)
-- [Sprint-2-Summary.md](Sprint-2-Summary.md) - Sprint 2 Abschlussbericht
-- [Sprint-2-Tasks.md](Sprint-2-Tasks.md) - Sprint 2 Aufgaben & Status
-- [Observability-Guide.md](Observability-Guide.md) - OpenTelemetry Setup
-- [keycloak/README.md](../keycloak/README.md) - Keycloak Konfiguration
+- [Architecture.md](../Architecture.md) - Systemarchitektur (aktueller Repo-Stand)
+- Sprint-2-Summary.md - historischer Sprint-2-Abschlussbericht, im aktuellen Repo-Stand nicht enthalten
+- Sprint-2-Tasks.md - historische Sprint-2-Aufgabenliste, im aktuellen Repo-Stand nicht enthalten
+- [guide.md](../guide.md) - aktuelles Betriebshandbuch; ersetzt den frueheren Observability Guide
+- [keycloak/README.md](../../keycloak/README.md) - Keycloak Konfiguration
 
 **Spezifikationen:**
-- [iwm.schema.json](iwm.schema.json) - IWM Schema v0.2
-- [openapi.yaml](api/openapi.yaml) - REST API Spezifikation
-- [workflow.proto](../api/src/main/proto/workflow.proto) - gRPC Proto
-- [task.proto](../api/src/main/proto/task.proto) - gRPC Proto
+- [iwm.schema.json](../../hexagon/core/src/main/resources/schema/iwm.schema.json) - IWM Schema v0.2
+- [openapi.yml](../api/openapi.yml) - REST API Spezifikation
+- [workflow.proto](../../adapters/driving/web/src/main/proto/workflow.proto) - gRPC Proto fuer WorkflowService und TaskService
+- task.proto - keine separate Datei im aktuellen Repo-Stand; TaskService ist in `workflow.proto` definiert
 
 **Projektplanung:**
-- [MVP-Plan-1.0.0.md](MVP-Plan-1.0.0.md) - MVP Roadmap
+- [MVP-Plan-2.0.0.md](../MVP-Plan-2.0.0.md) - aktuelle Roadmap; historischer MVP-Plan 1.0.0 ist nicht im Repo-Stand enthalten
 - [Lastenheft-x-wal-v1.5.0.md](Lastenheft-x-wal-v1.5.0.md) - Anforderungen
 
 ---
